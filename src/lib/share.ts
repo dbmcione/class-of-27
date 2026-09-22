@@ -1,7 +1,7 @@
 import { generateScorecard, type ScorecardInput } from './scorecard';
 
 export type ShareOutcome =
-  | { kind: 'shared'; captionCopied: boolean }
+  | { kind: 'shared'; captionCopied: boolean; textWentWithImage: boolean }
   | { kind: 'downloaded'; captionCopied: boolean }
   | { kind: 'cancelled' }
   | { kind: 'failed' };
@@ -71,9 +71,16 @@ export async function shareScorecard(input: ScorecardInput): Promise<ShareOutcom
     typeof navigator.canShare === 'function' &&
     navigator.canShare({ files: [file] })
   ) {
+    // Offer the text alongside the image where the platform accepts both.
+    // WhatsApp takes the image and drops the caption, which is why it is on
+    // the clipboard as well — but Telegram, Instagram, mail and others do
+    // carry it, so sending it costs nothing and often saves a paste.
+    const withText = { files: [file], text: caption, title: "Class of '27 Campus Challenge" };
+    const canSendText = navigator.canShare(withText);
+
     try {
-      await navigator.share({ files: [file] });
-      return { kind: 'shared', captionCopied };
+      await navigator.share(canSendText ? withText : { files: [file] });
+      return { kind: 'shared', captionCopied, textWentWithImage: canSendText };
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return { kind: 'cancelled' };
@@ -100,13 +107,14 @@ export async function shareScorecard(input: ScorecardInput): Promise<ShareOutcom
 export function shareHint(outcome: ShareOutcome): string {
   switch (outcome.kind) {
     case 'shared':
+      if (outcome.textWentWithImage) return '';
       return outcome.captionCopied
-        ? 'Caption copied — paste it into the message box before sending.'
-        : '';
+        ? 'Message copied — paste it under the image before sending.'
+        : 'Copy the message below and paste it under the image.';
     case 'downloaded':
       return outcome.captionCopied
-        ? 'Image saved and caption copied — attach the image, then paste the caption.'
-        : 'Image saved — attach it to your message.';
+        ? 'Image saved and message copied — attach the image, then paste the message.'
+        : 'Image saved. Copy the message below to go with it.';
     case 'failed':
       return 'Couldn’t create the scorecard on this device.';
     case 'cancelled':

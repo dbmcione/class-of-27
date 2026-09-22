@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { formatDuration, formatMinutesSeconds } from '../flow/puzzle';
 import { fetchLeaderboard, type LeaderboardEntry, type RoundScore } from '../lib/scores';
-import { shareScorecard, shareHint } from '../lib/share';
+import { buildShareCaption, shareScorecard, shareHint } from '../lib/share';
 import { generateScorecard } from '../lib/scorecard';
 import type { College } from '../lib/colleges';
 
@@ -48,6 +48,10 @@ export function ScoreScreen({
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  // Revealed after a share so the message is always reachable, even when the
+  // clipboard write was blocked or the target dropped the text.
+  const [showMessage, setShowMessage] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const scorecard = {
     ...score,
@@ -157,6 +161,11 @@ export function ScoreScreen({
             const outcome = await shareScorecard(scorecard);
             setSharing(false);
             setShareNote(shareHint(outcome) || null);
+            setCopied(outcome.kind === 'shared' || outcome.kind === 'downloaded'
+              ? outcome.captionCopied
+              : false);
+            // Anything but a cancel means they are mid-share and may need it.
+            setShowMessage(outcome.kind !== 'cancelled' && outcome.kind !== 'failed');
           }}
         >
           <ShareIcon />
@@ -166,6 +175,27 @@ export function ScoreScreen({
         <p className="share-note" role="status">
           {shareNote ?? ''}
         </p>
+
+        {showMessage && (
+          <div className="share-message">
+            <p className="share-message-label">Message to go with the image</p>
+            <pre className="share-message-body">{buildShareCaption(scorecard)}</pre>
+            <button
+              className="btn secondary share-copy"
+              type="button"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(buildShareCaption(scorecard));
+                  setCopied(true);
+                } catch {
+                  setCopied(false);
+                }
+              }}
+            >
+              {copied ? 'Copied ✓' : 'Copy message'}
+            </button>
+          </div>
+        )}
 
         <button className="btn" type="button" onClick={onSeeAnswers}>
           See The Answers
