@@ -33,7 +33,7 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
     id: 'fibromuscular-dysplasia',
     clue: 'Cause of renal artery stenosis with a "string-of-pearls" appearance on CT angiography.',
     answer: 'FIBROMUSCULAR DYSPLASIA',
-    explanation: 'A non-inflammatory, non-atherosclerotic arterial disease causing alternating narrowing and dilation of the vessel wall. Classically a young woman with hypertension — atherosclerosis is the commoner cause in older patients.',
+    explanation: 'A non-inflammatory, non-atherosclerotic arterial disease causing alternating narrowing and dilation of the vessel wall. Classically a young woman with hypertension. Atherosclerosis is the commoner cause in older patients.',
     mcq: {
       stem: 'A 23-year-old woman has a 6-month history of worsening headaches. Her blood pressure is 220/110 mm Hg and CT angiography shows a "string of pearls" in the right renal artery.',
       options: [
@@ -152,7 +152,7 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
     id: 'transposition-great-arteries',
     clue: '"Egg-on-side" cardiac silhouette in a neonate cyanosed within hours of birth.',
     answer: 'TRANSPOSITION OF GREAT ARTERIES',
-    explanation: 'The aorta arises from the right ventricle and the pulmonary artery from the left, creating two parallel circulations. Survival depends on mixing — prostaglandin E1 keeps the duct open pending balloon atrial septostomy.',
+    explanation: 'The aorta arises from the right ventricle and the pulmonary artery from the left, creating two parallel circulations. Survival depends on mixing. Prostaglandin E1 keeps the duct open pending balloon atrial septostomy.',
     mcq: {
       stem: 'A term neonate is deeply cyanosed at 4 hours of age. Chest X-ray shows an egg-on-side silhouette and echocardiography confirms discordant ventriculo-arterial connections.',
       options: [
@@ -252,7 +252,7 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
   },
   {
     id: 'multiple-sclerosis',
-    clue: '"Dawson fingers" — periventricular lesions perpendicular to the ventricles on MRI.',
+    clue: '"Dawson fingers": periventricular lesions perpendicular to the ventricles on MRI.',
     answer: 'MULTIPLE SCLEROSIS',
     explanation: 'Demyelination disseminated in time and space. CSF shows oligoclonal bands not matched in serum.',
     mcq: {
@@ -271,7 +271,7 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
     id: 'guillain-barre-syndrome',
     clue: 'Ascending flaccid paralysis with albuminocytological dissociation in the CSF.',
     answer: 'GUILLAIN BARRE SYNDROME',
-    explanation: 'Post-infectious demyelinating polyradiculoneuropathy, often after Campylobacter jejuni. Treated with IVIg or plasma exchange — steroids do not help.',
+    explanation: 'Post-infectious demyelinating polyradiculoneuropathy, often after Campylobacter jejuni. Treated with IVIg or plasma exchange. Steroids do not help.',
     mcq: {
       stem: 'A 30-year-old develops ascending weakness two weeks after an episode of bloody diarrhoea. CSF shows raised protein with normal cell count.',
       options: [
@@ -288,7 +288,7 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
     id: 'myasthenia-gravis',
     clue: 'Fatigable ptosis with a decremental response on repetitive nerve stimulation.',
     answer: 'MYASTHENIA GRAVIS',
-    explanation: 'Antibodies against the postsynaptic acetylcholine receptor. Always image the mediastinum — thymoma is present in about 10 per cent.',
+    explanation: 'Antibodies against the postsynaptic acetylcholine receptor. Always image the mediastinum. Thymoma is present in about 10 per cent.',
     mcq: {
       stem: 'A 40-year-old woman has drooping eyelids and double vision that worsen through the day. Repetitive nerve stimulation shows a decremental response.',
       options: [
@@ -320,7 +320,7 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
   },
   {
     id: 'haemochromatosis',
-    clue: '"Bronze diabetes" — skin pigmentation, diabetes and raised transferrin saturation.',
+    clue: '"Bronze diabetes": skin pigmentation, diabetes and raised transferrin saturation.',
     answer: 'HAEMOCHROMATOSIS',
     explanation: 'HFE gene mutation causing excess intestinal iron absorption. Venesection is first-line; untreated it leads to cirrhosis and hepatocellular carcinoma.',
     mcq: {

@@ -1,4 +1,5 @@
 import { generateScorecard, type ScorecardInput } from './scorecard';
+import { CHALLENGE_NAME } from '../flow/branding';
 
 export type ShareOutcome =
   | { kind: 'shared' }
@@ -27,7 +28,7 @@ export function buildShareCaption(input: ScorecardInput): string {
     `Hey ${input.playerName}`,
     `You scored ${input.solved}/${input.total} in ${input.timeLabel}!`,
     '',
-    'The game was just to showcase a glimpse of how NEET PG questions are evolving — clinical, image-based, and multi-step.',
+    'The game was just to showcase a glimpse of how NEET PG questions are evolving: clinical, image-based, and multi-step.',
     '',
     'Try it yourself',
     gameLink(),
@@ -56,7 +57,7 @@ export async function shareScorecard(input: ScorecardInput): Promise<ShareOutcom
   const payload = {
     files: [file],
     text: buildShareCaption(input),
-    title: "Class of '27 Campus Challenge",
+    title: CHALLENGE_NAME,
   };
 
   if (typeof navigator.share === 'function' && typeof navigator.canShare === 'function') {

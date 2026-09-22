@@ -29,7 +29,7 @@ function ShareIcon() {
 
 function verdict(solved: number, total: number): string {
   if (solved === total) return 'Clean sweep.';
-  if (solved === 0) return 'Tough round — the answers are worth a read.';
+  if (solved === 0) return 'Tough round. The answers are worth a read.';
   if (solved >= total / 2) return 'Solid round.';
   return 'Room to grow.';
 }
@@ -116,7 +116,7 @@ export function ScoreScreen({
         <p className="board-empty">Saving your score…</p>
       ) : saveFailed ? (
         <p className="board-empty">
-          We couldn’t save this round. Your score isn’t on the board — check
+          We couldn’t save this round. Your score isn’t on the board. Check
           your connection and play again.
         </p>
       ) : board.length === 0 ? (

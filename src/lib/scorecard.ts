@@ -1,4 +1,5 @@
 import logoUrl from '../assets/logo.png';
+import { CHALLENGE_NAME } from '../flow/branding';
 import type { RoundScore } from './scores';
 
 export type ScorecardInput = RoundScore & {
@@ -141,7 +142,7 @@ export async function generateScorecard(
   ctx.font = `700 26px ${FONT}`;
   ctx.fillStyle = 'rgba(159, 176, 217, 0.95)';
   ctx.letterSpacing = '3px';
-  ctx.fillText("CLASS OF '27 CAMPUS CHALLENGE", W / 2, 300);
+  ctx.fillText(CHALLENGE_NAME.toUpperCase(), W / 2, 300);
   ctx.letterSpacing = '0px';
 
   // --- Score, with room to breathe before the time line.

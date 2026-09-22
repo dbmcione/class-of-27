@@ -1,12 +1,9 @@
 import { useId, useState, type FormEvent } from 'react';
 import { isValidPhone, normalisePhone } from '../lib/phone';
 import { lookupPlayer } from '../lib/players';
+import { CHALLENGE_NAME, CHALLENGE_DESCRIPTION } from '../flow/branding';
 import type { Session } from '../flow/session';
 
-const CHALLENGE_NAME = "Class Of '27 Campus Challenge";
-const CHALLENGE_DESCRIPTION =
-  '1 puzzle. 1 leaderboard. See how you’d have scored on the recent NEET PG pattern — ' +
-  'and where you stand against the rest of your college.';
 
 type Props = {
   /** A known number with a finished intake goes straight to the game. */
@@ -67,7 +64,7 @@ export function LandingScreen({ onReturning, onNew }: Props) {
                 inputMode="numeric"
                 autoComplete="tel-national"
                 maxLength={10}
-                placeholder="10-digit number"
+                placeholder="10 digit number"
                 value={phone}
                 aria-invalid={showPhoneError}
                 aria-describedby={showPhoneError ? `${phoneId}-error` : undefined}
@@ -77,7 +74,7 @@ export function LandingScreen({ onReturning, onNew }: Props) {
             </div>
           </div>
           <p className="field-error" id={`${phoneId}-error`} role="alert">
-            {showPhoneError ? 'Enter a valid 10-digit mobile number.' : ''}
+            {showPhoneError ? 'Enter a valid 10 digit mobile number.' : ''}
           </p>
         </div>
 

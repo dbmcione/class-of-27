@@ -197,7 +197,7 @@ export function SelectField({
           ))}
           {hiddenCount > 0 && (
             <li className="combo-more" aria-hidden="true">
-              {hiddenCount.toLocaleString()} more — keep typing to narrow it down
+              {hiddenCount.toLocaleString()} more. Keep typing to narrow it down
             </li>
           )}
         </ul>
