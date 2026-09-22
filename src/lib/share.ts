@@ -6,13 +6,24 @@ export type ShareOutcome =
   | { kind: 'cancelled' }
   | { kind: 'failed' };
 
+/**
+ * Where the caption sends students. Change this when the campaign moves off
+ * staging — it is the only link in the share message.
+ */
+export const CLASS_LINK = 'https://web-staging.dbmci.one/class-of-27';
+
+/** The WhatsApp caption. Wording matches the campaign message. */
 export function buildShareCaption(input: ScorecardInput): string {
   return [
-    `I scored ${input.solved}/${input.total} on the Class of '27 Campus Challenge.`,
-    input.collegeName,
+    `Hey ${input.playerName}`,
+    `You scored ${input.solved}/${input.total} in ${input.timeLabel}!`,
     '',
-    'Think you can beat it?',
-    window.location.origin,
+    'The game was just to showcase a glimpse of how NEET PG questions are evolving — clinical, image-based, and multi-step.',
+    '',
+    'Evolving pattern of the NEET PG examination requires more focused preparation. The Class of \'27 helps you prepare with structured MCQ practice & recall, live faculty-led classes with real-time doubt-solving, and faculty-curated tests with spaced repetition.',
+    '',
+    "Join the Class of '27",
+    CLASS_LINK,
   ].join('\n');
 }
 

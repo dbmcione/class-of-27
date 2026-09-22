@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { formatDuration } from '../flow/puzzle';
+import { formatDuration, formatMinutesSeconds } from '../flow/puzzle';
 import { fetchLeaderboard, type LeaderboardEntry, type RoundScore } from '../lib/scores';
 import { shareScorecard, shareHint } from '../lib/share';
 import { generateScorecard } from '../lib/scorecard';
@@ -53,7 +53,7 @@ export function ScoreScreen({
     ...score,
     collegeName: college.name,
     playerName: playerName || 'Doctor-to-be',
-    timeLabel: formatDuration(score.totalSeconds),
+    timeLabel: formatMinutesSeconds(score.totalSeconds),
   };
 
   useEffect(() => {

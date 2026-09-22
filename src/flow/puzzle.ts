@@ -94,7 +94,17 @@ export function formatClock(totalSeconds: number): string {
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
-/** Human duration for the score screen: "2m 18s", or "47s" under a minute. */
+/**
+ * Always minutes and zero-padded seconds: "0m 08s", "2m 18s". Used on the
+ * scorecard and in the share caption, matching the campaign's wording.
+ */
+export function formatMinutesSeconds(totalSeconds: number): string {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
+}
+
+/** Compact duration for the leaderboard table: "2m 18s", or "47s" under a minute. */
 export function formatDuration(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
