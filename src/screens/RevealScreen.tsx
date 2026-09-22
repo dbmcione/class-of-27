@@ -38,9 +38,6 @@ export function RevealScreen({ puzzles, results, onPlayAgain }: Props) {
       <button className="btn" type="button" onClick={onPlayAgain}>
         Play Again
       </button>
-      <p className="footer-note">
-        A new round pulls fresh questions you haven’t seen yet.
-      </p>
     </div>
   );
 }
