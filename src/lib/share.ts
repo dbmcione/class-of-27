@@ -1,5 +1,8 @@
 import { generateScorecard, type ScorecardInput } from './scorecard';
 import { CHALLENGE_NAME } from '../flow/branding';
+// The card says "0m 57s" because its layout expects a fixed width. A sentence
+// does not, so the caption uses the compact form and says "57s".
+import { formatDuration } from '../flow/puzzle';
 
 export type ShareOutcome =
   | { kind: 'shared' }
@@ -19,18 +22,22 @@ export function gameLink(): string {
 }
 
 /**
- * The caption that travels with the scorecard. Deliberately short: the Class
- * of '27 pitch is sent separately as a WhatsApp message after the round, so
- * this one only has to make a friend want to play.
+ * The caption that travels with the scorecard. It is written in the player's
+ * voice, to a friend: the old version opened "Hey <player>" and then "You
+ * scored", which greeted the sender by their own name and told them what
+ * they had just done. Read by the person receiving it, that made no sense.
+ *
+ * Short on purpose. It only has to make a friend want to play, and it ends
+ * on a dare rather than an invitation because that is what gets forwarded in
+ * a batch group.
  */
 export function buildShareCaption(input: ScorecardInput): string {
   return [
-    `Hey ${input.playerName}`,
-    `You scored ${input.solved}/${input.total} in ${input.timeLabel}!`,
+    `I scored ${input.solved}/${input.total} in ${formatDuration(input.totalSeconds)} on ${CHALLENGE_NAME}.`,
     '',
-    'The game was just to showcase a glimpse of how NEET PG questions are evolving: clinical, image-based, and multi-step.',
+    `${input.total} clinical clues, ${input.total} diagnoses. It is a glimpse of how NEET PG is being asked now: clinical, image-based, multi-step.`,
     '',
-    'Try it yourself',
+    'Think you can beat me?',
     gameLink(),
   ].join('\n');
 }
