@@ -101,6 +101,7 @@ export function ScoreScreen({
       </div>
 
       <h2 className="board-title">Your College Board</h2>
+      <p className="board-note">Each player&rsquo;s best round.</p>
 
       {loading ? (
         <p className="board-empty">Saving your score…</p>
@@ -127,7 +128,9 @@ export function ScoreScreen({
                 <td>{entry.rank}</td>
                 <td>
                   {entry.displayName}
-                  {entry.playerId === playerId && <span className="you-tag">You</span>}
+                  {entry.playerId === playerId && (
+                    <span className="you-tag">Your best</span>
+                  )}
                 </td>
                 <td>
                   {entry.solved}/{entry.total}
