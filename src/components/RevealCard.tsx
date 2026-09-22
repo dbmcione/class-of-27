@@ -1,0 +1,88 @@
+import { useId, useState } from 'react';
+import type { Puzzle } from '../flow/bank';
+import { teaser, titleCaseAnswer } from '../flow/puzzle';
+
+const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+export function RevealCard({
+  puzzle,
+  index,
+  solved,
+}: {
+  puzzle: Puzzle;
+  index: number;
+  solved: boolean;
+}) {
+  const panelId = useId();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <li className={`reveal-item${open ? ' is-open' : ''}`}>
+      <button
+        type="button"
+        className="reveal-toggle"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span className="reveal-top">
+          <span className="reveal-num">{String(index + 1).padStart(2, '0')}</span>
+          <span className={`reveal-status${solved ? ' is-solved' : ''}`}>
+            {solved ? 'Solved' : 'Missed'}
+          </span>
+        </span>
+
+        <span className="reveal-answer">{titleCaseAnswer(puzzle.answer)}</span>
+        <span className="reveal-clue">{puzzle.clue}</span>
+
+        {!open && (
+          <span className="reveal-teaser">
+            {teaser(puzzle.explanation)}
+            <span className="reveal-fade" aria-hidden="true" />
+          </span>
+        )}
+
+        <span className="reveal-more">
+          {open ? 'Show less' : 'Read more'}
+          <ChevronIcon open={open} />
+        </span>
+      </button>
+
+      {open && (
+        <div className="reveal-panel" id={panelId}>
+          <p className="reveal-body">{puzzle.explanation}</p>
+
+          <div className="mcq">
+            <p className="mcq-label">NEET PG question</p>
+            <p className="mcq-stem">{puzzle.mcq.stem}</p>
+            <ol className="mcq-options">
+              {puzzle.mcq.options.map((option, i) => {
+                const isCorrect = i === puzzle.mcq.correctIndex;
+                return (
+                  <li key={option} className={`mcq-option${isCorrect ? ' is-correct' : ''}`}>
+                    <span className="mcq-letter">{OPTION_LETTERS[i]}</span>
+                    <span className="mcq-text">{option}</span>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+
+          <p className="reveal-tags">{puzzle.tags.join(' · ')}</p>
+        </div>
+      )}
+    </li>
+  );
+}
+
+function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      className={`reveal-chevron${open ? ' is-open' : ''}`}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}

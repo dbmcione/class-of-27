@@ -1,0 +1,139 @@
+import { useEffect, useState } from 'react';
+import logoUrl from './assets/logo.png';
+import { LandingScreen } from './screens/LandingScreen';
+import { IntakeScreen } from './screens/IntakeScreen';
+import { TransitionScreen } from './screens/TransitionScreen';
+import { PuzzleScreen } from './screens/PuzzleScreen';
+import { ScoreScreen } from './screens/ScoreScreen';
+import { RevealScreen } from './screens/RevealScreen';
+import { saveRound, summarise } from './lib/scores';
+import { loadSeen, recordServed, resetSeen } from './lib/seen';
+import { selectRound, type PuzzleResult } from './flow/round';
+import type { Puzzle } from './flow/bank';
+import { nextStep, type Step } from './flow/steps';
+import type { Session } from './flow/session';
+
+export function App() {
+  const [step, setStep] = useState<Step>('landing');
+  const [phone, setPhone] = useState<string | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [round, setRound] = useState<readonly Puzzle[]>([]);
+  const [results, setResults] = useState<readonly PuzzleResult[]>([]);
+  // Bumped to draw a fresh round when the player goes again.
+  const [roundKey, setRoundKey] = useState(0);
+
+  function advance() {
+    setStep((s) => nextStep(s));
+  }
+
+  const playerId = session?.playerId;
+
+  /**
+   * Draw the round as soon as the player is registered, so the puzzle screen
+   * never waits on a fetch. Recorded as served straight away — a student who
+   * abandons midway should still not be shown the same five next time.
+   */
+  useEffect(() => {
+    if (!playerId) return;
+    let cancelled = false;
+
+    void (async () => {
+      const seen = await loadSeen(playerId);
+      const selection = selectRound(seen);
+      if (cancelled) return;
+
+      setRound(selection.puzzles);
+      if (selection.cycled) await resetSeen(playerId);
+      await recordServed(
+        playerId,
+        selection.puzzles.map((p) => p.id),
+      );
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [playerId, roundKey]);
+
+  return (
+    <div className="device">
+      <header className="topbar">
+        <img className="topbar-logo" src={logoUrl} alt="DBMCI" />
+      </header>
+
+      {step === 'landing' && (
+        <LandingScreen
+          onReturning={(existing) => {
+            // Intake is answered once; a returning player goes to the game.
+            setSession(existing);
+            setPhone(existing.phone);
+            setStep('transition');
+          }}
+          onNew={(entered) => {
+            setPhone(entered);
+            advance();
+          }}
+        />
+      )}
+
+      {step === 'intake' && phone !== null && (
+        <IntakeScreen
+          phone={phone}
+          onDone={(created) => {
+            setSession(created);
+            advance();
+          }}
+        />
+      )}
+
+      {step === 'transition' && session && (
+        <TransitionScreen
+          name={session.name}
+          questionCount={round.length}
+          ready={round.length > 0}
+          onStart={advance}
+        />
+      )}
+
+      {step === 'puzzle' && round.length > 0 && session && (
+        <PuzzleScreen
+          puzzles={round}
+          onFinish={(finished) => {
+            setResults(finished);
+            void saveRound({
+              playerId: session.playerId,
+              collegeId: session.college.id,
+              name: session.name ?? '',
+              score: summarise(finished),
+              results: finished,
+            });
+            advance();
+          }}
+        />
+      )}
+
+      {step === 'score' && session && (
+        <ScoreScreen
+          playerId={session.playerId}
+          playerName={session.name ?? ''}
+          college={session.college}
+          score={summarise(results)}
+          onSeeAnswers={advance}
+        />
+      )}
+
+      {step === 'reveal' && (
+        <RevealScreen
+          puzzles={round}
+          results={results}
+          onPlayAgain={() => {
+            setResults([]);
+            setRound([]);
+            setRoundKey((k) => k + 1);
+            setStep('transition');
+          }}
+        />
+      )}
+    </div>
+  );
+}

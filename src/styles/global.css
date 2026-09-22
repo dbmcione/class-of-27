@@ -1,0 +1,1199 @@
+:root {
+  --bg-deep: #04061a;
+  --surface: rgba(255, 255, 255, 0.07);
+  --surface-soft: rgba(255, 255, 255, 0.05);
+  --surface-strong: rgba(255, 255, 255, 0.12);
+  --aurora-teal: #46e6b3;
+  --aurora-cyan: #4fd1ff;
+  --aurora-purple: #9b7bff;
+  --aurora-pink: #e88bd0;
+  --pill-bg: #ffffff;
+  --pill-ink: #16224a;
+  --ink: #f3f6ff;
+  --muted: #9fb0d9;
+  --line: rgba(255, 255, 255, 0.14);
+  --danger-ink: #ffd3da;
+  --radius: 22px;
+  --shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: #01030d;
+  color: var(--ink);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+#root {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.device {
+  width: 100%;
+  max-width: 430px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 32px;
+  box-shadow: var(--shadow);
+  min-height: 680px;
+  max-height: calc(100dvh - 48px);
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-deep);
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(4, 6, 26, 0.35) 0%,
+      rgba(6, 8, 30, 0.72) 42%,
+      rgba(4, 5, 26, 0.96) 72%,
+      var(--bg-deep) 100%
+    ),
+    url('../assets/aurora.jpg');
+  background-size: cover, cover;
+  background-position: top center, top center;
+  background-repeat: no-repeat, no-repeat;
+}
+
+/* Starfield overlay */
+.device::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.9;
+  background-image:
+    radial-gradient(1.4px 1.4px at 12% 18%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1px 1px at 32% 62%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1.4px 1.4px at 58% 12%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 78% 48%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1px 1px at 44% 82%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1.4px 1.4px at 90% 76%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 6% 88%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 68% 92%, rgba(255, 255, 255, 0.5), transparent);
+  background-size: 280px 280px;
+  background-repeat: repeat;
+}
+
+.device > * { position: relative; z-index: 1; }
+
+/* --- Top bar: logo pinned to the left corner ----------------------------- */
+.topbar {
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.topbar-logo {
+  height: 22px;
+  width: auto;
+  display: block;
+}
+
+/* --- Screen shell -------------------------------------------------------- */
+.screen {
+  padding: 0 24px 30px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Top padding lives here, not on .screen, so .matrix-head can stick flush
+   against the visible top edge with nothing bleeding above it. */
+.screen > *:first-child {
+  margin-top: 30px;
+}
+
+h1 {
+  font-size: 26px;
+  margin: 0 0 10px;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+p.sub {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.badge {
+  display: inline-block;
+  background: linear-gradient(90deg, rgba(70, 230, 179, 0.28), rgba(155, 123, 255, 0.28));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #eafff6;
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  padding: 5px 12px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+  width: fit-content;
+}
+
+/* --- Form ---------------------------------------------------------------- */
+.form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-top: 28px;
+}
+
+.field { margin-bottom: 16px; }
+
+label {
+  font-size: 14px;
+  color: var(--ink);
+  margin: 0 0 8px;
+  display: block;
+  font-weight: 700;
+}
+
+/* --- Ombre gradient field ------------------------------------------------
+   A gradient border done as a 1.5px padded wrapper: the gradient paints the
+   wrapper, the inner element paints over the middle. Colours are the four
+   aurora tones from the wireframe.
+   ------------------------------------------------------------------------ */
+.ombre-field {
+  --ombre: linear-gradient(
+    115deg,
+    var(--aurora-teal) 0%,
+    var(--aurora-cyan) 32%,
+    var(--aurora-purple) 66%,
+    var(--aurora-pink) 100%
+  );
+  border-radius: 16px;
+  padding: 1.5px;
+  background-image: var(--ombre);
+  background-size: 220% 220%;
+  background-position: 0% 50%;
+}
+
+.ombre-field.is-open,
+.ombre-field:focus-within {
+  background-position: 100% 50%;
+  box-shadow: 0 0 0 3px rgba(155, 123, 255, 0.16);
+}
+
+.ombre-field[data-invalid='true'] {
+  background-image: linear-gradient(115deg, #e8788c 0%, var(--aurora-pink) 100%);
+}
+
+.ombre-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 14.5px;
+  background: #0a0e28;
+  padding: 0 14px;
+}
+
+.ombre-field input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 15px;
+  padding: 14px 0;
+}
+
+.ombre-field input::placeholder { color: var(--muted); }
+.ombre-field input:disabled { cursor: wait; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ombre-field { transition: background-position 0.45s ease, box-shadow 0.2s ease; }
+}
+
+/* --- Combobox ------------------------------------------------------------ */
+.combo { position: relative; }
+
+.combo-icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* A chosen college shows in the placeholder slot, so lift it to ink colour. */
+.combo-input[data-filled='true']::placeholder {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.combo-chevron {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.combo-chevron svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.combo-chevron.is-open svg { transform: rotate(180deg); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .combo-chevron svg { transition: transform 0.2s ease; }
+}
+
+.combo-list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  max-height: 268px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0;
+  padding: 8px;
+  list-style: none;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: #0a0e28;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+.combo-option {
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.combo-option.is-active {
+  background: linear-gradient(
+    115deg,
+    rgba(70, 230, 179, 0.18),
+    rgba(79, 209, 255, 0.16),
+    rgba(155, 123, 255, 0.2),
+    rgba(232, 139, 208, 0.18)
+  );
+}
+
+.combo-option-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.combo-option-meta {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.combo-more {
+  padding: 10px 12px 4px;
+  font-size: 11.5px;
+  color: rgba(159, 176, 217, 0.6);
+  text-align: center;
+}
+
+.combo-empty {
+  padding: 14px 12px;
+  font-size: 13.5px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.combo-list::-webkit-scrollbar { width: 6px; }
+.combo-list::-webkit-scrollbar-track { background: transparent; }
+.combo-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--surface-strong);
+}
+
+/* --- Phone ---------------------------------------------------------------- */
+.phone-prefix {
+  font-size: 15px;
+  color: var(--muted);
+  font-weight: 600;
+  flex: none;
+}
+
+.phone-prefix + input { letter-spacing: 0.04em; }
+
+/* --- Validation messages -------------------------------------------------- */
+.field-error {
+  color: var(--danger-ink);
+  font-size: 12.5px;
+  margin: 7px 0 0;
+  min-height: 16px;
+}
+
+.form-error {
+  color: var(--danger-ink);
+  font-size: 13px;
+  text-align: center;
+  margin: 0 0 12px;
+}
+
+/* --- Button -------------------------------------------------------------- */
+.btn {
+  margin-top: auto;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: none;
+  background: var(--pill-bg);
+  color: var(--pill-ink);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.footer-note {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  margin: 12px 0 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn { transition: opacity 0.15s ease, transform 0.15s ease; }
+  .btn:not(:disabled):active { transform: scale(0.98); }
+}
+
+code {
+  font-size: 12.5px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--surface-strong);
+  color: var(--aurora-teal);
+}
+
+/* --- Questionnaire -------------------------------------------------------- */
+
+.matrix-title {
+  /* No divider — the gap alone separates this block from the fields above. */
+  margin: 34px 0 0;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.matrix-intro {
+  margin: 6px 0 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* --- Question matrix ------------------------------------------------------
+   Column A is the statement, columns B and C are the two answers.
+   ------------------------------------------------------------------------ */
+.matrix {
+  --matrix-cols: 1fr 58px 58px;
+  display: flex;
+  flex-direction: column;
+}
+
+.matrix-head {
+  display: grid;
+  grid-template-columns: var(--matrix-cols);
+  gap: 6px;
+  align-items: end;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 12px 0 8px;
+  margin-bottom: 2px;
+  background: rgba(6, 9, 32, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+.matrix-head-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.matrix-row {
+  display: grid;
+  grid-template-columns: var(--matrix-cols);
+  gap: 6px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.matrix-row:last-child { border-bottom: none; }
+
+.matrix-statement {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.matrix-cell {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.matrix-cell input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+}
+
+.matrix-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: var(--surface-soft);
+}
+
+.matrix-cell.is-selected .matrix-dot {
+  border-color: transparent;
+  background-image:
+    radial-gradient(circle at center, var(--bg-deep) 0 4px, transparent 4.5px),
+    linear-gradient(115deg, var(--aurora-teal), var(--aurora-purple));
+  background-origin: border-box;
+  background-clip: border-box;
+}
+
+.matrix-cell:has(input:focus-visible) {
+  outline: 2px solid var(--aurora-cyan);
+  outline-offset: 1px;
+}
+
+/* Flagged only after a failed submit, so the form never nags while filling. */
+.matrix-row.is-missing .matrix-statement { color: var(--danger-ink); }
+.matrix-row.is-missing .matrix-dot { border-color: rgba(232, 120, 140, 0.65); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .matrix-dot { transition: background 0.18s ease, border-color 0.18s ease; }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- Centred screens (transition, result) --------------------------------- */
+.screen-centred {
+  text-align: center;
+}
+
+/* Takes all the free space and centres within it, so the block sits in the
+   middle and the button stays pinned to the bottom. Using auto margins on
+   both would split the free space three ways and land the block high. */
+.centred-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.centred-block .badge {
+  margin-bottom: 18px;
+}
+
+.centred-block .sub {
+  max-width: 34ch;
+}
+
+/* --- Puzzle --------------------------------------------------------------- */
+.screen-puzzle {
+  overflow-y: auto;
+}
+
+/* Five segments filling as the round advances. Deliberately not dots — the
+   guesses-left indicator below already uses dots and means something else. */
+.puzzle-progress {
+  margin-bottom: 16px;
+}
+
+.progress-track {
+  display: flex;
+  gap: 5px;
+}
+
+.progress-seg {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.progress-seg.is-done,
+.progress-seg.is-current {
+  background-image: linear-gradient(115deg, var(--aurora-teal), var(--aurora-purple));
+  background-origin: border-box;
+  background-clip: border-box;
+}
+
+.progress-seg.is-current {
+  box-shadow: 0 0 10px rgba(155, 123, 255, 0.55);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .progress-seg { transition: background-image 0.25s ease, box-shadow 0.25s ease; }
+}
+
+.puzzle-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.question-count {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.timer {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.clue-box {
+  background: rgba(6, 9, 32, 0.78);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 16px 0 20px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* --- Fill-in-the-blanks --------------------------------------------------- */
+.word-display {
+  --gap: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.word-row {
+  display: flex;
+  gap: var(--gap);
+  justify-content: center;
+  width: 100%;
+}
+
+/* Sized off the longest word so no word ever breaks across lines. */
+.letter-box {
+  width: calc((100% - (var(--maxlen) - 1) * var(--gap)) / var(--maxlen));
+  max-width: 30px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 3px solid var(--aurora-teal);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.letter-box.is-missed {
+  border-bottom-color: rgba(232, 120, 140, 0.8);
+  color: var(--danger-ink);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .letter-box { transition: color 0.15s ease; }
+}
+
+/* --- Attempts ------------------------------------------------------------- */
+.attempts {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.attempts-pips {
+  display: flex;
+  gap: 5px;
+}
+
+.pip {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.pip.is-used {
+  background: var(--aurora-pink);
+}
+
+.attempts-text {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* --- Keyboard ------------------------------------------------------------- */
+.keyboard {
+  margin-top: auto;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kb-row {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.key {
+  flex: 1 1 0;
+  max-width: 38px;
+  padding: 12px 0;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  color: var(--ink);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.key.is-correct {
+  background-image: linear-gradient(115deg, var(--aurora-teal), var(--aurora-purple));
+  background-origin: border-box;
+  background-clip: border-box;
+  border-color: transparent;
+  color: var(--bg-deep);
+}
+
+.key.is-wrong {
+  background: rgba(232, 120, 140, 0.22);
+  border-color: rgba(232, 120, 140, 0.4);
+  color: var(--danger-ink);
+}
+
+.key:disabled {
+  cursor: not-allowed;
+}
+
+.key.is-unused:disabled {
+  opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .key { transition: background 0.15s ease, color 0.15s ease; }
+}
+
+/* --- Inline round outcome ------------------------------------------------- */
+.outcome {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 8px;
+}
+
+.badge.is-fail {
+  background: linear-gradient(90deg, rgba(232, 120, 140, 0.32), rgba(232, 150, 120, 0.28));
+  color: var(--danger-ink);
+}
+
+.outcome-title {
+  margin: 4px 0 6px;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.outcome-answer {
+  margin: 0 0 20px;
+  font-size: 14.5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.outcome-answer strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.outcome .btn {
+  margin-top: 0;
+  width: 100%;
+}
+
+/* --- Reveal cards --------------------------------------------------------- */
+.reveal-list {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reveal-item {
+  background: rgba(7, 10, 32, 0.66);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.reveal-item.is-open {
+  background: rgba(7, 10, 32, 0.86);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.reveal-toggle {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 16px 18px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.reveal-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* A quiet ordinal rather than a filled counter chip. */
+.reveal-num {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(159, 176, 217, 0.5);
+  font-variant-numeric: tabular-nums;
+}
+
+.reveal-status {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(232, 150, 170, 0.9);
+}
+
+.reveal-status.is-solved {
+  color: var(--aurora-teal);
+}
+
+/* The diagnosis is the point of the card, so it leads. */
+.reveal-answer {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 7px;
+}
+
+.reveal-clue {
+  display: block;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(159, 176, 217, 0.85);
+  padding-left: 11px;
+  border-left: 2px solid rgba(255, 255, 255, 0.14);
+  margin-bottom: 12px;
+}
+
+/* Cut mid-word, faded out — the card should read as unfinished. */
+.reveal-teaser {
+  display: block;
+  position: relative;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(226, 232, 250, 0.72);
+}
+
+.reveal-fade {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 96px;
+  height: 1.6em;
+  background: linear-gradient(90deg, rgba(8, 11, 34, 0), rgba(8, 11, 34, 0.95) 75%);
+  pointer-events: none;
+}
+
+.reveal-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(159, 176, 217, 0.9);
+}
+
+.reveal-chevron {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.reveal-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-chevron { transition: transform 0.2s ease; }
+}
+
+/* --- Expanded --------------------------------------------------------------
+   Separation comes from space, not from more boxes and coloured labels.
+   -------------------------------------------------------------------------- */
+.reveal-panel {
+  padding: 0 18px 18px;
+}
+
+.reveal-body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: rgba(226, 232, 250, 0.78);
+}
+
+.mcq {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.mcq-label {
+  margin: 0 0 9px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(159, 176, 217, 0.55);
+}
+
+.mcq-stem {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.mcq-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+/* Plain rows; only the right answer earns any colour on this page. */
+.mcq-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 9px 11px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: rgba(226, 232, 250, 0.72);
+}
+
+.mcq-option.is-correct {
+  background: rgba(70, 230, 179, 0.12);
+  color: #d4fff0;
+  font-weight: 600;
+}
+
+.mcq-letter {
+  flex: none;
+  width: 13px;
+  font-weight: 700;
+  color: rgba(159, 176, 217, 0.5);
+}
+
+.mcq-option.is-correct .mcq-letter {
+  color: var(--aurora-teal);
+}
+
+.mcq-text {
+  flex: 1;
+}
+
+/* Tags as a quiet caption, not a row of chips. */
+.reveal-tags {
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: rgba(159, 176, 217, 0.6);
+}
+
+/* Long answers need smaller glyphs to stay inside their boxes. */
+.letter-box {
+  font-size: min(15px, calc(230px / var(--maxlen)));
+}
+
+/* --- Score ---------------------------------------------------------------- */
+.score-hero {
+  text-align: center;
+  padding: 26px 0 8px;
+}
+
+.score-college {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.score-big {
+  margin: 0;
+  font-size: 58px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  background-image: linear-gradient(
+    115deg,
+    var(--aurora-teal),
+    var(--aurora-cyan),
+    var(--aurora-purple)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.score-of {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.score-verdict {
+  margin: 14px 0 4px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.score-time {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* --- Leaderboard ---------------------------------------------------------- */
+.board-title {
+  margin: 30px 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.board {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.board th {
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.board td {
+  padding: 11px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.board tr:last-child td {
+  border-bottom: none;
+}
+
+.board tr.is-me td {
+  color: var(--aurora-teal);
+  font-weight: 700;
+}
+
+.you-tag {
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(70, 230, 179, 0.2);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.board-empty {
+  margin: 4px 0 0;
+  padding: 18px 14px;
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* --- Stacked actions at the foot of a screen ------------------------------ */
+.screen-actions {
+  margin-top: auto;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The wrapper owns the push to the bottom, so the buttons inside must not. */
+.screen-actions .btn {
+  margin-top: 0;
+}
+
+.screen-actions .btn + .btn {
+  margin-top: 10px;
+}
+
+.btn.secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.btn.secondary:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.btn-icon {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.share-note {
+  margin: 8px 0 0;
+  min-height: 16px;
+  font-size: 12px;
+  text-align: center;
+  color: var(--aurora-teal);
+}
+
+.scorecard-preview {
+  display: block;
+  width: 100%;
+  border-radius: 16px;
+  margin: 22px 0 0;
+  border: 1px solid var(--line);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
