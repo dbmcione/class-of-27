@@ -12,6 +12,17 @@ export type ShareOutcome =
  */
 export const CLASS_LINK = 'https://web-staging.dbmci.one/class-of-27';
 
+/**
+ * Where this game itself lives, taken from the page rather than hardcoded so
+ * it stays correct if the app moves host. Includes the path, because GitHub
+ * Pages serves it under /<repo>/ and the origin alone would 404.
+ */
+export function gameLink(): string {
+  const { origin, pathname } = window.location;
+  const path = pathname.replace(/index\.html$/, '');
+  return (origin + path).replace(/\/+$/, '') + '/';
+}
+
 /** The WhatsApp caption. Wording matches the campaign message. */
 export function buildShareCaption(input: ScorecardInput): string {
   return [
@@ -19,6 +30,9 @@ export function buildShareCaption(input: ScorecardInput): string {
     `You scored ${input.solved}/${input.total} in ${input.timeLabel}!`,
     '',
     'The game was just to showcase a glimpse of how NEET PG questions are evolving — clinical, image-based, and multi-step.',
+    '',
+    'Try it yourself',
+    gameLink(),
     '',
     'Evolving pattern of the NEET PG examination requires more focused preparation. The Class of \'27 helps you prepare with structured MCQ practice & recall, live faculty-led classes with real-time doubt-solving, and faculty-curated tests with spaced repetition.',
     '',
