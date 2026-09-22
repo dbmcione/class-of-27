@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { RevealCard } from '../components/RevealCard';
 import type { Puzzle } from '../flow/bank';
 import type { PuzzleResult } from '../flow/round';
@@ -11,6 +12,8 @@ type Props = {
 /** All five questions with their answers, MCQs and tags, after the round. */
 export function RevealScreen({ puzzles, results, onPlayAgain }: Props) {
   const solvedCount = results.filter((r) => r.solved).length;
+  // One card open at a time; opening another closes the previous one.
+  const [openId, setOpenId] = useState<string | null>(null);
 
   return (
     <div className="screen">
@@ -26,6 +29,8 @@ export function RevealScreen({ puzzles, results, onPlayAgain }: Props) {
             puzzle={puzzle}
             index={i}
             solved={results[i]?.solved ?? false}
+            open={openId === puzzle.id}
+            onToggle={() => setOpenId((id) => (id === puzzle.id ? null : puzzle.id))}
           />
         ))}
       </ol>

@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useId, useLayoutEffect, useRef } from 'react';
 import type { Puzzle } from '../flow/bank';
 import { teaser, titleCaseAnswer } from '../flow/puzzle';
 
@@ -8,22 +8,54 @@ export function RevealCard({
   puzzle,
   index,
   solved,
+  open,
+  onToggle,
 }: {
   puzzle: Puzzle;
   index: number;
   solved: boolean;
+  open: boolean;
+  onToggle: () => void;
 }) {
   const panelId = useId();
-  const [open, setOpen] = useState(false);
+  const itemRef = useRef<HTMLLIElement>(null);
+  const wasOpen = useRef(open);
+
+  /**
+   * Opening a card collapses the previously open one, which shifts this card
+   * up or down the page — often out of view. Scroll it back to the top so the
+   * card you tapped is the card you are looking at.
+   *
+   * Deferred a frame so the collapse has been laid out first, and deliberately
+   * not `behavior: 'smooth'` — a smooth scroll started in the same tick as a
+   * large layout change gets dropped, leaving the card off screen.
+   */
+  useLayoutEffect(() => {
+    const justOpened = open && !wasOpen.current;
+    wasOpen.current = open;
+    if (!justOpened) return;
+
+    const card = itemRef.current;
+    const scroller = card?.closest<HTMLElement>('.screen');
+    if (!card || !scroller) return;
+
+    // Measured geometry rather than scrollIntoView: that depends on the page
+    // painting and silently does nothing when it has not. useLayoutEffect
+    // runs after the collapse has been applied to the DOM, so these rects are
+    // already the post-collapse ones — no rAF or timeout needed.
+    const delta =
+      card.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+    scroller.scrollTop += delta - 8;
+  }, [open]);
 
   return (
-    <li className={`reveal-item${open ? ' is-open' : ''}`}>
+    <li className={`reveal-item${open ? ' is-open' : ''}`} ref={itemRef}>
       <button
         type="button"
         className="reveal-toggle"
         aria-expanded={open}
         aria-controls={panelId}
-        onClick={() => setOpen((o) => !o)}
+        onClick={onToggle}
       >
         <span className="reveal-top">
           <span className="reveal-num">{String(index + 1).padStart(2, '0')}</span>

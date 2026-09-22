@@ -10,7 +10,7 @@ export type ShareOutcome =
  * Where the caption sends students. Change this when the campaign moves off
  * staging — it is the only link in the share message.
  */
-export const CLASS_LINK = 'https://web-staging.dbmci.one/class-of-27';
+export const CLASS_LINK = 'https://dbmci.com/class-of-27';
 
 /**
  * Where this game itself lives, taken from the page rather than hardcoded so
