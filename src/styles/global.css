@@ -641,7 +641,10 @@ code {
 
 /* --- Fill-in-the-blanks --------------------------------------------------- */
 .word-display {
-  --gap: 5px;
+  /* The gap is fixed width the boxes have to share, so a long word pays for
+     it twice: more gaps, each stealing from a narrower box. It shrinks as the
+     word grows. HYPERALDOSTERONISM is the longest in the bank at 18. */
+  --gap: max(2.5px, calc(9px - var(--maxlen) * 0.3px));
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -1311,4 +1314,13 @@ code {
   }
 
   .keyboard { gap: 5px; }
+
+  /* A three-word answer stacks three rows of blanks, which is 18px more than
+     this screen has. The rows give it back. */
+  .word-display {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .letter-box { height: 30px; }
 }

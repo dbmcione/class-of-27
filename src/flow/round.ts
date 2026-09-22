@@ -1,4 +1,5 @@
 import { PUZZLE_BANK, QUESTIONS_PER_ROUND, type Puzzle } from './bank';
+import { FIRST_ROUND_BANK } from './recall-bank';
 
 export type PuzzleResult = {
   puzzleId: string;
@@ -32,6 +33,12 @@ export type RoundSelection = {
  * Picks the next set of puzzles, skipping anything this player has already
  * been shown. When fewer than a full round remain, the pool starts over —
  * otherwise a returning student would hit a dead end after five attempts.
+ *
+ * TEMPORARY: a player who has seen nothing gets the five NEET PG 2026
+ * recalls instead of a draw from the bank, in the order the sheet lists
+ * them. Delete this branch and `recall-bank.ts` together once the full
+ * question list lands. Their ids still go into the seen list, so a second
+ * round draws from the bank as usual and never repeats them.
  */
 export function selectRound(
   seen: readonly string[],
@@ -39,6 +46,11 @@ export function selectRound(
   bank: readonly Puzzle[] = PUZZLE_BANK,
   count: number = QUESTIONS_PER_ROUND,
 ): RoundSelection {
+  if (seen.length === 0 && FIRST_ROUND_BANK.length >= count) {
+    const puzzles = FIRST_ROUND_BANK.slice(0, count);
+    return { puzzles: [...puzzles], nextSeen: puzzles.map((p) => p.id), cycled: false };
+  }
+
   const seenSet = new Set(seen);
   let pool = bank.filter((p) => !seenSet.has(p.id));
   let cycled = false;
