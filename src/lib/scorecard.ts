@@ -7,6 +7,15 @@ export type ScorecardInput = RoundScore & {
   timeLabel: string;
 };
 
+/** "22 September 2026" — the day the round was played. */
+function playedOn(): string {
+  return new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
 const W = 1000;
 const H = 1250;
 
@@ -163,15 +172,11 @@ export async function generateScorecard(
 
   ctx.font = `700 40px ${FONT}`;
   ctx.fillStyle = '#f3f6ff';
-  ctx.fillText('Think you can beat it?', W / 2, 1010);
+  ctx.fillText('Think you can beat it?', W / 2, 1030);
 
   ctx.font = `500 26px ${FONT}`;
-  ctx.fillStyle = 'rgba(159, 176, 217, 0.85)';
-  ctx.fillText(window.location.origin.replace(/^https?:\/\//, ''), W / 2, 1060);
-
-  ctx.font = `600 24px ${FONT}`;
-  ctx.fillStyle = 'rgba(159, 176, 217, 0.6)';
-  ctx.fillText('1 round · 5 questions · 5 guesses each', W / 2, 1160);
+  ctx.fillStyle = 'rgba(159, 176, 217, 0.75)';
+  ctx.fillText(playedOn(), W / 2, 1140);
 
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, 'image/png'),

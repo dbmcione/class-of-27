@@ -21,6 +21,12 @@ export function App() {
   const [results, setResults] = useState<readonly PuzzleResult[]>([]);
   // Bumped to draw a fresh round when the player goes again.
   const [roundKey, setRoundKey] = useState(0);
+  /**
+   * The in-flight write of this round's score. The score screen waits on it
+   * before loading the leaderboard, otherwise it reads the board before the
+   * player's own row has landed and reports "no scores yet".
+   */
+  const [pendingSave, setPendingSave] = useState<Promise<{ ok: boolean }> | null>(null);
 
   function advance() {
     setStep((s) => nextStep(s));
@@ -100,13 +106,15 @@ export function App() {
           puzzles={round}
           onFinish={(finished) => {
             setResults(finished);
-            void saveRound({
-              playerId: session.playerId,
-              collegeId: session.college.id,
-              name: session.name ?? '',
-              score: summarise(finished),
-              results: finished,
-            });
+            setPendingSave(
+              saveRound({
+                playerId: session.playerId,
+                collegeId: session.college.id,
+                name: session.name ?? '',
+                score: summarise(finished),
+                results: finished,
+              }),
+            );
             advance();
           }}
         />
@@ -118,6 +126,7 @@ export function App() {
           playerName={session.name ?? ''}
           college={session.college}
           score={summarise(results)}
+          pendingSave={pendingSave}
           onSeeAnswers={advance}
         />
       )}
@@ -129,6 +138,7 @@ export function App() {
           onPlayAgain={() => {
             setResults([]);
             setRound([]);
+            setPendingSave(null);
             setRoundKey((k) => k + 1);
             setStep('transition');
           }}

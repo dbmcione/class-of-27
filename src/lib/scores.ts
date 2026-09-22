@@ -43,7 +43,7 @@ export async function saveRound(args: {
   name: string;
   score: RoundScore;
   results: readonly PuzzleResult[];
-}): Promise<void> {
+}): Promise<{ ok: boolean }> {
   const { playerId, collegeId, name, score, results } = args;
 
   if (!supabase) {
@@ -54,16 +54,20 @@ export async function saveRound(args: {
     } catch {
       // Private browsing or full quota.
     }
-    return;
+    return { ok: true };
   }
 
-  await supabase.from('round_scores').insert({
+  const { error } = await supabase.from('round_scores').insert({
     player_id: playerId,
     college_id: collegeId,
     solved: score.solved,
     total: score.total,
     total_seconds: score.totalSeconds,
   });
+
+  // The leaderboard is driven by round_scores, so this one failing is what
+  // the player would notice. Per-puzzle results are secondary.
+  if (error) return { ok: false };
 
   if (results.length > 0) {
     await supabase.from('puzzle_results').insert(
@@ -76,6 +80,8 @@ export async function saveRound(args: {
       })),
     );
   }
+
+  return { ok: true };
 }
 
 /**

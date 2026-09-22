@@ -10,6 +10,8 @@ type Props = {
   playerName: string;
   college: College;
   score: RoundScore;
+  /** Resolves once this round's score has been written. */
+  pendingSave: Promise<{ ok: boolean }> | null;
   onSeeAnswers: () => void;
 };
 
@@ -32,9 +34,17 @@ function verdict(solved: number, total: number): string {
   return 'Room to grow.';
 }
 
-export function ScoreScreen({ playerId, playerName, college, score, onSeeAnswers }: Props) {
+export function ScoreScreen({
+  playerId,
+  playerName,
+  college,
+  score,
+  pendingSave,
+  onSeeAnswers,
+}: Props) {
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saveFailed, setSaveFailed] = useState(false);
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
@@ -60,15 +70,23 @@ export function ScoreScreen({ playerId, playerName, college, score, onSeeAnswers
 
   useEffect(() => {
     let cancelled = false;
-    void fetchLeaderboard(college.id).then((rows) => {
+
+    void (async () => {
+      // Wait for this round's own write before reading the board back.
+      const saved = pendingSave ? await pendingSave : { ok: true };
+      if (cancelled) return;
+      setSaveFailed(!saved.ok);
+
+      const rows = await fetchLeaderboard(college.id);
       if (cancelled) return;
       setBoard(rows);
       setLoading(false);
-    });
+    })();
+
     return () => {
       cancelled = true;
     };
-  }, [college.id]);
+  }, [college.id, pendingSave]);
 
   return (
     <div className="screen">
@@ -85,11 +103,14 @@ export function ScoreScreen({ playerId, playerName, college, score, onSeeAnswers
       <h2 className="board-title">Your College Board</h2>
 
       {loading ? (
-        <p className="board-empty">Loading the board…</p>
-      ) : board.length === 0 ? (
+        <p className="board-empty">Saving your score…</p>
+      ) : saveFailed ? (
         <p className="board-empty">
-          No scores yet. Yours will be the first once it saves.
+          We couldn’t save this round. Your score isn’t on the board — check
+          your connection and play again.
         </p>
+      ) : board.length === 0 ? (
+        <p className="board-empty">No scores on this college’s board yet.</p>
       ) : (
         <table className="board">
           <thead>
