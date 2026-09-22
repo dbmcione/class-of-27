@@ -47,7 +47,12 @@ export async function shareScorecard(input: ScorecardInput): Promise<ShareOutcom
   const card = await generateScorecard(input);
   if (!card) return { kind: 'failed' };
 
-  const file = new File([card.blob], 'class-of-27-scorecard.png', { type: 'image/png' });
+  // Name and MIME must agree with what was actually encoded, or a share
+  // target may reject the file as an unrecognised type.
+  const extension = card.format === 'image/png' ? 'png' : 'jpg';
+  const file = new File([card.blob], `class-of-27-scorecard.${extension}`, {
+    type: card.format,
+  });
   const payload = {
     files: [file],
     text: buildShareCaption(input),
@@ -81,7 +86,7 @@ export async function shareScorecard(input: ScorecardInput): Promise<ShareOutcom
     const url = URL.createObjectURL(card.blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'class-of-27-scorecard.png';
+    link.download = file.name;
     document.body.appendChild(link);
     link.click();
     link.remove();

@@ -107,10 +107,20 @@ function drawBackground(ctx: CanvasRenderingContext2D): void {
   }
 }
 
-/** Renders the shareable scorecard. Returns the PNG blob and a preview URL. */
+export type ScorecardFormat = 'image/jpeg' | 'image/png';
+
+/**
+ * Renders the shareable scorecard.
+ *
+ * JPEG by default: the card is an opaque photo-like image with no
+ * transparency, and the PNG came out around 1.3 MB — heavy to hand to a share
+ * sheet and slow to send on mobile data. Quality 0.92 keeps the gradients
+ * clean at a fraction of the size.
+ */
 export async function generateScorecard(
   input: ScorecardInput,
-): Promise<{ blob: Blob; dataUrl: string } | null> {
+  format: ScorecardFormat = 'image/jpeg',
+): Promise<{ blob: Blob; dataUrl: string; format: ScorecardFormat } | null> {
   const canvas = document.createElement('canvas');
   canvas.width = W;
   canvas.height = H;
@@ -210,10 +220,11 @@ export async function generateScorecard(
   ctx.fillStyle = 'rgba(159, 176, 217, 0.7)';
   ctx.fillText(playedOn(), W / 2, panelBottom + 202);
 
+  const quality = format === 'image/jpeg' ? 0.92 : undefined;
   const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, 'image/png'),
+    canvas.toBlob(resolve, format, quality),
   );
   if (!blob) return null;
 
-  return { blob, dataUrl: canvas.toDataURL('image/png') };
+  return { blob, dataUrl: canvas.toDataURL(format, quality), format };
 }

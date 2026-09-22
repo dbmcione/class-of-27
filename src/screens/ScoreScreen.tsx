@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { formatDuration, formatMinutesSeconds } from '../flow/puzzle';
 import { fetchLeaderboard, type LeaderboardEntry, type RoundScore } from '../lib/scores';
 import { shareScorecard, shareHint } from '../lib/share';
@@ -47,6 +47,13 @@ export function ScoreScreen({
   const [saveFailed, setSaveFailed] = useState(false);
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
+  /**
+   * `disabled={sharing}` only takes effect on the next render, which happens
+   * after this handler yields at its first await — so a fast double tap fires
+   * two shares and attaches the image twice. A ref blocks the second tap
+   * synchronously, before any awaiting starts.
+   */
+  const sharingRef = useRef(false);
   const [preview, setPreview] = useState<string | null>(null);
   // Revealed after a share so the message is always reachable, even when the
   // clipboard write was blocked or the target dropped the text.
@@ -154,11 +161,17 @@ export function ScoreScreen({
           type="button"
           disabled={sharing}
           onClick={async () => {
+            if (sharingRef.current) return;
+            sharingRef.current = true;
             setSharing(true);
             setShareNote(null);
-            const outcome = await shareScorecard(scorecard);
-            setSharing(false);
-            setShareNote(shareHint(outcome) || null);
+            try {
+              const outcome = await shareScorecard(scorecard);
+              setShareNote(shareHint(outcome) || null);
+            } finally {
+              sharingRef.current = false;
+              setSharing(false);
+            }
           }}
         >
           <ShareIcon />
