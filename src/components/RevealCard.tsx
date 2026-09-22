@@ -69,7 +69,7 @@ export function RevealCard({
 
         {!open && (
           <span className="reveal-teaser">
-            {teaser(puzzle.explanation)}
+            {teaser(puzzle.definition)}
             <span className="reveal-fade" aria-hidden="true" />
           </span>
         )}
@@ -82,10 +82,10 @@ export function RevealCard({
 
       {open && (
         <div className="reveal-panel" id={panelId}>
-          <p className="reveal-body">{puzzle.explanation}</p>
+          <p className="reveal-body">{puzzle.definition}</p>
 
-          <div className="mcq">
-            <p className="mcq-label">NEET PG question</p>
+          <div className="reveal-section">
+            <p className="reveal-label">Recent NEET PG PYQ</p>
             <p className="mcq-stem">{puzzle.mcq.stem}</p>
             <ol className="mcq-options">
               {puzzle.mcq.options.map((option, i) => {
@@ -100,7 +100,10 @@ export function RevealCard({
             </ol>
           </div>
 
-          <p className="reveal-tags">{puzzle.tags.join(' · ')}</p>
+          <div className="reveal-section">
+            <p className="reveal-label">Clinical decision flow</p>
+            <p className="reveal-body">{puzzle.explanation}</p>
+          </div>
         </div>
       )}
     </li>

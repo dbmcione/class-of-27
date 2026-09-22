@@ -964,13 +964,15 @@ code {
   color: rgba(226, 232, 250, 0.78);
 }
 
-.mcq {
+/* The question and the reasoning are the same kind of thing: a labelled
+   block under a hairline. They share the rule so they cannot drift apart. */
+.reveal-section {
   margin-top: 20px;
   padding-top: 18px;
   border-top: 1px solid rgba(255, 255, 255, 0.09);
 }
 
-.mcq-label {
+.reveal-label {
   margin: 0 0 9px;
   font-size: 10.5px;
   font-weight: 700;
@@ -1026,16 +1028,6 @@ code {
 
 .mcq-text {
   flex: 1;
-}
-
-/* Tags as a quiet caption, not a row of chips. */
-.reveal-tags {
-  margin: 18px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
-  font-size: 11.5px;
-  line-height: 1.5;
-  color: rgba(159, 176, 217, 0.6);
 }
 
 /* Long answers need smaller glyphs to stay inside their boxes. */
