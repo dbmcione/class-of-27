@@ -100,7 +100,7 @@ export function IntakeScreen({ phone, onDone }: Props) {
         : `${unanswered.length} statement${unanswered.length > 1 ? 's' : ''} left to mark.`;
 
   return (
-    <div className="screen">
+    <div className="screen intake-screen">
       <h1>Quick Intro</h1>
       <p className="sub">Takes about a minute. There are no right answers.</p>
 
