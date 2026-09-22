@@ -88,14 +88,16 @@ body {
 
 /* --- Top bar: logo pinned to the left corner ----------------------------- */
 .topbar {
-  padding: 16px 22px;
+  padding: 14px 22px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
 }
 
+/* The logo grows but the bar's vertical padding shrinks to match, so the
+   header only gains a few pixels and the screen below keeps its room. */
 .topbar-logo {
-  height: 22px;
+  height: 32px;
   width: auto;
   display: block;
 }
@@ -155,6 +157,10 @@ p.sub {
 }
 
 .field { margin-bottom: 16px; }
+
+/* The landing page has one short field and a Start button, so it can afford
+   more air between the description and the number. The intake form cannot. */
+.landing-form { margin-top: 52px; }
 
 label {
   font-size: 14px;

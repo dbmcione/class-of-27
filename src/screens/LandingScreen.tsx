@@ -50,7 +50,7 @@ export function LandingScreen({ onReturning, onNew }: Props) {
       <h1>{CHALLENGE_NAME}</h1>
       <p className="sub">{CHALLENGE_DESCRIPTION}</p>
 
-      <form className="form" onSubmit={handleSubmit} noValidate>
+      <form className="form landing-form" onSubmit={handleSubmit} noValidate>
         <div className="field">
           <label htmlFor={phoneId}>Mobile Number</label>
           <div className="ombre-field" data-invalid={showPhoneError}>
