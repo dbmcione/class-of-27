@@ -252,9 +252,11 @@ grant execute on function public.register_player(uuid, text) to anon, authentica
 -- college_leaderboard: the board shown on the score screen.
 --
 -- security definer so it can read players and round_scores, which the anon
--- key cannot select directly. It returns a FIRST NAME only — never the full
--- name and never the phone number — so the board cannot be used to harvest
--- contact details for a college.
+-- key cannot select directly. It returns the player's name but never their
+-- phone number.
+--
+-- NOTE: superseded by supabase/migration-full-names.sql, which switched this
+-- from a first name to the full name at the product owner's request.
 --
 -- One row per player: their best round, ranked by most solved then fastest.
 -- ---------------------------------------------------------------------------

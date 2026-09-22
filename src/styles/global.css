@@ -1111,6 +1111,22 @@ code {
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   color: var(--ink);
   font-variant-numeric: tabular-nums;
+  vertical-align: top;
+}
+
+/* Full names can be long, so the name column takes the slack and wraps;
+   score and time stay on one line. */
+.board td:nth-child(2) {
+  width: 99%;
+  overflow-wrap: anywhere;
+  padding-right: 10px;
+}
+
+.board td:nth-child(3),
+.board td:nth-child(4),
+.board th:nth-child(3),
+.board th:nth-child(4) {
+  white-space: nowrap;
 }
 
 .board tr:last-child td {
@@ -1123,6 +1139,8 @@ code {
 }
 
 .you-tag {
+  display: inline-block;
+  white-space: nowrap;
   margin-left: 6px;
   padding: 2px 7px;
   border-radius: 999px;

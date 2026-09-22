@@ -134,7 +134,7 @@ export async function generateScorecard(
   ctx.fillText("CLASS OF '27 CAMPUS CHALLENGE", W / 2, 300);
   ctx.letterSpacing = '0px';
 
-  // Score, in the app's gradient.
+  // --- Score, with room to breathe before the time line.
   const scoreText = `${input.solved}/${input.total}`;
   ctx.font = `800 210px ${FONT}`;
   const scoreGrad = ctx.createLinearGradient(W / 2 - 220, 0, W / 2 + 220, 0);
@@ -142,41 +142,73 @@ export async function generateScorecard(
   scoreGrad.addColorStop(0.5, '#4fd1ff');
   scoreGrad.addColorStop(1, '#9b7bff');
   ctx.fillStyle = scoreGrad;
-  ctx.fillText(scoreText, W / 2, 520);
+  ctx.fillText(scoreText, W / 2, 530);
 
   ctx.font = `600 30px ${FONT}`;
   ctx.fillStyle = 'rgba(159, 176, 217, 0.9)';
-  ctx.fillText(`solved in ${input.timeLabel}`, W / 2, 580);
+  ctx.fillText(`solved in ${input.timeLabel}`, W / 2, 625);
 
-  // Player name and college, in a panel.
-  const panelY = 660;
-  const panelH = 230;
-  ctx.fillStyle = 'rgba(255,255,255,0.06)';
-  roundedRect(ctx, 70, panelY, W - 140, panelH, 28);
+  // --- Name panel, sized to its own content so the text sits centred
+  // whether the college name runs to one line or two.
+  const panelX = 60;
+  const panelW = W - panelX * 2;
+  const panelPadY = 52;
+  const nameLine = 62;
+  const collegeLine = 40;
+  const nameToCollege = 12;
+
+  ctx.font = `500 29px ${FONT}`;
+  const collegeLines = wrap(ctx, input.collegeName, panelW - 110).slice(0, 2);
+
+  const panelH =
+    panelPadY * 2 + nameLine + nameToCollege + collegeLines.length * collegeLine;
+  const panelY = 700;
+
+  const panelFill = ctx.createLinearGradient(0, panelY, 0, panelY + panelH);
+  panelFill.addColorStop(0, 'rgba(255, 255, 255, 0.085)');
+  panelFill.addColorStop(1, 'rgba(255, 255, 255, 0.035)');
+  ctx.fillStyle = panelFill;
+  roundedRect(ctx, panelX, panelY, panelW, panelH, 32);
   ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+
+  const panelEdge = ctx.createLinearGradient(panelX, panelY, panelX + panelW, panelY + panelH);
+  panelEdge.addColorStop(0, 'rgba(70, 230, 179, 0.45)');
+  panelEdge.addColorStop(0.5, 'rgba(255, 255, 255, 0.18)');
+  panelEdge.addColorStop(1, 'rgba(155, 123, 255, 0.45)');
+  ctx.strokeStyle = panelEdge;
   ctx.lineWidth = 2;
-  roundedRect(ctx, 70, panelY, W - 140, panelH, 28);
+  roundedRect(ctx, panelX, panelY, panelW, panelH, 32);
   ctx.stroke();
 
-  ctx.font = `700 44px ${FONT}`;
-  ctx.fillStyle = '#f3f6ff';
-  ctx.fillText(input.playerName, W / 2, panelY + 78);
+  // Middle baseline makes the vertical centring exact rather than eyeballed.
+  ctx.textBaseline = 'middle';
 
-  ctx.font = `500 27px ${FONT}`;
-  ctx.fillStyle = 'rgba(159, 176, 217, 0.95)';
-  const collegeLines = wrap(ctx, input.collegeName, W - 220).slice(0, 2);
+  ctx.font = `700 50px ${FONT}`;
+  ctx.fillStyle = '#f3f6ff';
+  ctx.fillText(input.playerName, W / 2, panelY + panelPadY + nameLine / 2);
+
+  ctx.font = `500 29px ${FONT}`;
+  ctx.fillStyle = 'rgba(176, 191, 228, 0.95)';
   collegeLines.forEach((line, i) => {
-    ctx.fillText(line, W / 2, panelY + 132 + i * 38);
+    ctx.fillText(
+      line,
+      W / 2,
+      panelY + panelPadY + nameLine + nameToCollege + collegeLine * i + collegeLine / 2,
+    );
   });
+
+  ctx.textBaseline = 'alphabetic';
+
+  // --- Footer, spaced off the panel rather than fixed to the canvas.
+  const panelBottom = panelY + panelH;
 
   ctx.font = `700 40px ${FONT}`;
   ctx.fillStyle = '#f3f6ff';
-  ctx.fillText('Think you can beat it?', W / 2, 1030);
+  ctx.fillText('Think you can beat it?', W / 2, panelBottom + 116);
 
   ctx.font = `500 26px ${FONT}`;
-  ctx.fillStyle = 'rgba(159, 176, 217, 0.75)';
-  ctx.fillText(playedOn(), W / 2, 1140);
+  ctx.fillStyle = 'rgba(159, 176, 217, 0.7)';
+  ctx.fillText(playedOn(), W / 2, panelBottom + 202);
 
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, 'image/png'),
