@@ -721,22 +721,33 @@ code {
 
 .kb-row {
   display: flex;
-  gap: 5px;
+  gap: 4px;
   justify-content: center;
 }
 
+/* Ten keys have to share one row, so width is whatever is left after the
+   gaps. Height is the part we can actually spend, and it scales with the
+   viewport: tall phones get roomier keys, short ones stay at the floor that
+   keeps all three rows above the fold. */
 .key {
   flex: 1 1 0;
-  max-width: 38px;
-  padding: 12px 0;
+  max-width: 44px;
+  padding: clamp(11px, 1.7vh, 16px) 0;
   border-radius: 9px;
   border: 1px solid var(--line);
   background: var(--surface-soft);
   color: var(--ink);
   font-family: inherit;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 16px;
   cursor: pointer;
+  /* Without this the browser holds every tap back to see whether a second one
+     is coming (double-tap to zoom), and a finger that rests a moment pops the
+     text-selection magnifier over the letters. Both read as a mis-press. */
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .key.is-correct {
@@ -1268,6 +1279,15 @@ code {
     padding-right: calc(24px + env(safe-area-inset-right));
     padding-bottom: calc(24px + env(safe-area-inset-bottom));
   }
+
+  /* The text column wants 24px of breathing room; the keyboard wants width.
+     It claws back 14px of that padding on each side, which is the difference
+     between a 28px key and a 32px one. Staying under the padding means the
+     row never spills past the screen's edge. */
+  .keyboard {
+    margin-left: -14px;
+    margin-right: -14px;
+  }
 }
 
 /* --- Short phones ---------------------------------------------------------
@@ -1285,7 +1305,10 @@ code {
     font-size: 14px;
   }
 
-  .key { padding: 10px 0; }
+  .key {
+    padding: 9px 0;
+    font-size: 15px;
+  }
 
   .keyboard { gap: 5px; }
 }
