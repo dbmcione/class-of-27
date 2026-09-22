@@ -38,9 +38,13 @@ export function buildShareCaption(input: ScorecardInput): string {
 /**
  * One tap: hands the image and the caption to the share sheet together.
  *
- * Note for anyone debugging a missing caption: WhatsApp's share target often
- * takes the image and drops the text. That is WhatsApp's behaviour, not a bug
- * here — every other target (Telegram, Instagram, mail, Slack) carries both.
+ * Note for anyone debugging this: what a target does with the payload is up
+ * to the target, and they disagree. iOS hands the share sheet two separate
+ * items, the image and the caption, and each app decides which it accepts.
+ * iMessage takes both. WhatsApp takes the image and drops the text. Slack is
+ * unreliable with the combination. The page is never told which app was
+ * picked, so there is no way to send one of them a different payload.
+ *
  * The previous copy-to-clipboard workaround was removed deliberately; the
  * paste step cost more than the occasional lost caption.
  */
