@@ -938,13 +938,16 @@ code {
   color: var(--aurora-teal);
 }
 
-/* The diagnosis is the point of the card, so it leads. */
+/* The diagnosis is the point of the card, so it leads.
+   Matched to the equivalent heading on dbmci.com, which is also 20px Fredoka:
+   weight 500 with no tracking at all. The air in their headings comes from
+   the lighter weight, not from spacing. At 700 the same 20px line reads as a
+   solid block no matter how much tracking is thrown at it. */
 .reveal-answer {
   display: block;
   font-size: 20px;
-  font-weight: 700;
-  line-height: 1.25;
-  letter-spacing: var(--heading-tracking);
+  font-weight: 500;
+  line-height: 1.3;
   color: var(--ink);
   margin-bottom: 7px;
 }
