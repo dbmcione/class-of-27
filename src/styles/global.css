@@ -688,7 +688,9 @@ code {
   margin: 16px 0 20px;
   font-size: 14.5px;
   line-height: 1.55;
-  font-weight: 600;
+  /* The panel and the ink colour already carry the clue. It is a sentence to
+     read, not a label, so it is set at the body weight. */
+  font-weight: 400;
   color: var(--ink);
 }
 
