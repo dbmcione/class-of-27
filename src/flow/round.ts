@@ -1,5 +1,4 @@
 import { PUZZLE_BANK, QUESTIONS_PER_ROUND, type Puzzle } from './bank';
-import { FIRST_ROUND_BANK } from './recall-bank';
 
 export type PuzzleResult = {
   puzzleId: string;
@@ -34,11 +33,10 @@ export type RoundSelection = {
  * been shown. When fewer than a full round remain, the pool starts over —
  * otherwise a returning student would hit a dead end after five attempts.
  *
- * TEMPORARY: a player who has seen nothing gets the five NEET PG 2026
- * recalls instead of a draw from the bank, in the order the sheet lists
- * them. Delete this branch and `recall-bank.ts` together once the full
- * question list lands. Their ids still go into the seen list, so a second
- * round draws from the bank as usual and never repeats them.
+ * With the bank at exactly one round, that second clause is the only one that
+ * ever runs: a replay serves the same five in the same order, which is the
+ * intended behaviour until the bank grows. Nothing here needs changing when
+ * it does; the exclusion starts working again on its own.
  */
 export function selectRound(
   seen: readonly string[],
@@ -46,9 +44,10 @@ export function selectRound(
   bank: readonly Puzzle[] = PUZZLE_BANK,
   count: number = QUESTIONS_PER_ROUND,
 ): RoundSelection {
-  if (seen.length === 0 && FIRST_ROUND_BANK.length >= count) {
-    const puzzles = FIRST_ROUND_BANK.slice(0, count);
-    return { puzzles: [...puzzles], nextSeen: puzzles.map((p) => p.id), cycled: false };
+  // A bank no larger than a round has nothing to choose between, so it is
+  // served in the sheet's order rather than shuffled into a different one.
+  if (bank.length <= count) {
+    return { puzzles: [...bank], nextSeen: bank.map((p) => p.id), cycled: true };
   }
 
   const seenSet = new Set(seen);

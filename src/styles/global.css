@@ -1053,6 +1053,18 @@ code {
   color: var(--ink);
 }
 
+/* The figure a stem refers to. Full width of the card, with the aspect ratio
+   left to the file so a scan is never squashed. */
+.mcq-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+}
+
 .mcq-options {
   list-style: none;
   margin: 0;
@@ -1093,6 +1105,35 @@ code {
 
 .mcq-text {
   flex: 1;
+}
+
+/* One reason per line, marked rather than run together as a paragraph. */
+.tough-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.tough-list li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(226, 232, 250, 0.78);
+}
+
+.tough-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--aurora-teal);
 }
 
 /* Long answers need smaller glyphs to stay inside their boxes. */

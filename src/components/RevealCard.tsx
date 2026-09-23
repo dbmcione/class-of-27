@@ -103,6 +103,14 @@ export function RevealCard({
           <div className="reveal-section">
             <p className="reveal-label">Recent NEET PG PYQ</p>
             <p className="mcq-stem">{puzzle.mcq.stem}</p>
+            {puzzle.image && (
+              <img
+                className="mcq-image"
+                src={puzzle.image.src}
+                alt={puzzle.image.alt}
+                loading="lazy"
+              />
+            )}
             <ol className="mcq-options">
               {puzzle.mcq.options.map((option, i) => {
                 const isCorrect = i === puzzle.mcq.correctIndex;
@@ -117,8 +125,12 @@ export function RevealCard({
           </div>
 
           <div className="reveal-section">
-            <p className="reveal-label">Clinical decision flow</p>
-            <Prose text={puzzle.explanation} />
+            <p className="reveal-label">What made it tough</p>
+            <ul className="tough-list">
+              {puzzle.tough.map((reason) => (
+                <li key={reason}>{reason}</li>
+              ))}
+            </ul>
           </div>
         </div>
       )}
