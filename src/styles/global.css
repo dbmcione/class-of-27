@@ -1414,11 +1414,23 @@ code {
   padding-top: 8px;
 }
 
-.debrief-lede {
-  margin: 0 0 28px;
+/* The two opening sentences. Centred, and two paragraphs rather than one
+   with a line break, so the gap between them is a real margin that scales
+   with the type instead of a hard return. */
+.debrief-intro {
+  text-align: center;
+  margin-bottom: 34px;
+}
+
+.debrief-intro p {
+  margin: 0;
   font-size: 24px;
   line-height: 1.5;
   color: var(--ink);
+}
+
+.debrief-intro p + p {
+  margin-top: 22px;
 }
 
 .debrief-kicker {

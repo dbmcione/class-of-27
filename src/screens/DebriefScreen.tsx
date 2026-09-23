@@ -20,12 +20,13 @@ const PATTERNS = [
 export function DebriefScreen({ onContinue }: Props) {
   return (
     <div className="screen debrief-screen">
-      <p className="debrief-lede">
-        What you played just now was a fun game identifying diagnosis based on
-        topics seen in recent NEET PG.
-        <br />
-        But the MCQs asked in the exam were more clinical.
-      </p>
+      <div className="debrief-intro">
+        <p>
+          What you played just now was a fun game identifying diagnosis based on
+          topics seen in recent NEET PG.
+        </p>
+        <p>But the MCQs asked in the exam were more clinical.</p>
+      </div>
 
       <p className="debrief-kicker">This year, we’ve seen MCQs that are:</p>
 
