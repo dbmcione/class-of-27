@@ -1,3 +1,5 @@
+import fmdCtaUrl from '../assets/puzzles/fibromuscular-dysplasia-cta.jpg';
+
 /**
  * The puzzle bank.
  *
@@ -22,6 +24,14 @@ export type PuzzleImage = {
   src: string;
   /** Described for a student who cannot see it, not just labelled. */
   alt: string;
+  /**
+   * Intrinsic pixel size. Not for layout, which is fluid: it reserves the
+   * right height before the file arrives. The card scrolls itself into view
+   * as it opens, and an image that lands afterwards would shove everything
+   * below it down past the position just scrolled to.
+   */
+  width: number;
+  height: number;
 };
 
 export type Puzzle = {
@@ -52,13 +62,22 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
       'tortuosity of medium-sized arteries, most commonly the renal and carotid ' +
       'arteries.',
     tough: [
-      
       'Multi-step: The diagnosis must be identified first, before selecting the ' +
       'definitive treatment.',
       'Integrated between subjects: Medicine and Radiology',
       'Image based',
       'Clinical scenario',
     ],
+    image: {
+      src: fmdCtaUrl,
+      width: 444,
+      height: 400,
+      alt:
+        'Axial CT angiogram of the abdomen at the level of the kidneys. The ' +
+        'aorta is opacified centrally with the renal arteries branching to ' +
+        'each side, showing alternating narrowing and dilatation along their ' +
+        'length, the string of beads appearance.',
+    },
     mcq: {
       stem:
         'A 23-year-old woman presents with a 6-month history of recurrent, severe ' +
@@ -123,7 +142,6 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
       'blood to enter the aortic media, causing separation of the layers of the ' +
       'aortic wall and formation of a false lumen.',
     tough: [
-      
       'Multi-step: The diagnosis must be identified first, before choosing the ' +
       'confirmatory investigation.',
       'Integrated between subjects: Medicine and Radiology',
@@ -161,7 +179,6 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
       'VIII), typically presenting with unilateral hearing loss, tinnitus and ' +
       'vestibular symptoms.',
     tough: [
-      
       'Multi-step: The diagnosis must be identified first, before choosing the ' +
       'investigation.',
       'Integrated between subjects: ENT and Radiology',
@@ -197,7 +214,6 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
       'which may lead to acute kidney injury, cardiac arrhythmias, seizures, and ' +
       'death.',
     tough: [
-      
       'Multi-step: The diagnosis must be identified first, before choosing the next ' +
       'step in management.',
       'Integrated between subjects: Paediatrics and Medicine',

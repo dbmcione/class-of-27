@@ -108,7 +108,8 @@ export function RevealCard({
                 className="mcq-image"
                 src={puzzle.image.src}
                 alt={puzzle.image.alt}
-                loading="lazy"
+                width={puzzle.image.width}
+                height={puzzle.image.height}
               />
             )}
             <ol className="mcq-options">
