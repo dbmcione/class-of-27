@@ -105,6 +105,19 @@ export function formatMinutesSeconds(totalSeconds: number): string {
 }
 
 /** Compact duration for the leaderboard table: "2m 18s", or "47s" under a minute. */
+/**
+ * Rounded to the nearest minute, for prose. "2m 18s" is the right shape for a
+ * leaderboard column and the wrong one inside a sentence a student sends a
+ * friend, where it reads like a stopwatch reading rather than a brag.
+ */
+export function formatApproxDuration(totalSeconds: number): string {
+  if (totalSeconds < 60) {
+    return `${totalSeconds} second${totalSeconds === 1 ? '' : 's'}`;
+  }
+  const minutes = Math.max(1, Math.round(totalSeconds / 60));
+  return `${minutes} minute${minutes === 1 ? '' : 's'}`;
+}
+
 export function formatDuration(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;

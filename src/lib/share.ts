@@ -1,8 +1,8 @@
 import { generateScorecard, type ScorecardInput } from './scorecard';
 import { CHALLENGE_NAME } from '../flow/branding';
 // The card says "0m 57s" because its layout expects a fixed width. A sentence
-// does not, so the caption uses the compact form and says "57s".
-import { formatDuration } from '../flow/puzzle';
+// does not, so the caption rounds to the nearest minute.
+import { formatApproxDuration } from '../flow/puzzle';
 
 export type ShareOutcome =
   | { kind: 'shared' }
@@ -33,11 +33,13 @@ export function gameLink(): string {
  */
 export function buildShareCaption(input: ScorecardInput): string {
   return [
-    `I scored ${input.solved}/${input.total} in ${formatDuration(input.totalSeconds)} on ${CHALLENGE_NAME}.`,
+    `Hey, I just played Spot the Diagnosis by DBMCI One and scored ` +
+      `${input.solved}/${input.total} correct in ` +
+      `${formatApproxDuration(input.totalSeconds)}. Do you think you can ` +
+      `beat me? Here's the link:`,
     '',
-    `${input.total} clinical clues, ${input.total} diagnoses. It is a glimpse of how NEET PG is being asked now: clinical, image-based, multi-step.`,
-    '',
-    'Think you can beat me?',
+    // The blank line matters: WhatsApp only renders a preview card for a URL
+    // that stands on its own, and a link buried mid-sentence gets skimmed.
     gameLink(),
   ].join('\n');
 }
