@@ -1096,9 +1096,7 @@ code {
 .score-college {
   margin: 0 0 12px;
   font-size: 12px;
-  /* Not bold: uppercase and tracked already gives this line enough presence,
-     and at 700 a long college name reads as shouting. */
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--muted);
@@ -1107,10 +1105,9 @@ code {
 .score-big {
   margin: 0;
   font-size: 58px;
-  /* Fredoka's axis stops at 700; 800 would silently clamp to the same face. */
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.02em;
   background-image: linear-gradient(
     115deg,
     var(--aurora-teal),
@@ -1131,7 +1128,6 @@ code {
   margin: 14px 0 4px;
   font-size: 17px;
   font-weight: 700;
-  letter-spacing: var(--heading-tracking-sm);
   color: var(--ink);
 }
 
@@ -1152,7 +1148,6 @@ code {
   margin: 30px 0 4px;
   font-size: 15px;
   font-weight: 700;
-  letter-spacing: var(--heading-tracking-sm);
   color: var(--ink);
 }
 
@@ -1237,9 +1232,13 @@ code {
   flex-direction: column;
 }
 
-/* The wrapper owns the push to the bottom, so the buttons inside must not. */
+/* The wrapper owns the push to the bottom, so the buttons inside must not.
+   This wrapper is the score page and nowhere else, so the bold button that
+   page was designed around stays here while the rest of the app keeps the
+   lighter weight. */
 .screen-actions .btn {
   margin-top: 0;
+  font-weight: 700;
 }
 
 .screen-actions .btn + .btn {
