@@ -114,6 +114,10 @@ export type Database = {
           total: number;
           total_seconds: number;
           created_at: string;
+          /** Share code for this round's answers page. Null for rounds
+              written before play links existed. */
+          code: string | null;
+          detail: unknown;
         };
         Insert: {
           id?: string;
@@ -162,6 +166,34 @@ export type Database = {
           solved: number;
           total: number;
           total_seconds: number;
+        }[];
+      };
+      save_round: {
+        Args: {
+          p_player_id: string;
+          p_college_id: string;
+          p_solved: number;
+          p_total: number;
+          p_total_seconds: number;
+          p_results: {
+            puzzleId: string;
+            solved: boolean;
+            seconds: number;
+            wrongGuesses: number;
+          }[];
+        };
+        /** The share code for the round just written. */
+        Returns: string;
+      };
+      get_play: {
+        Args: { p_code: string };
+        Returns: {
+          first_name: string | null;
+          solved: number;
+          total: number;
+          total_seconds: number;
+          detail: unknown;
+          played_at: string;
         }[];
       };
     };

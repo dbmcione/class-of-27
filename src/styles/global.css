@@ -454,6 +454,14 @@ label {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
 }
 
+/* The answers page uses a link rather than a button, because it navigates.
+   An anchor is inline by default, so it needs the box the button already has. */
+a.btn {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}
+
 .btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;

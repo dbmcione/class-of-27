@@ -37,13 +37,20 @@ export function summarise(results: readonly PuzzleResult[]): RoundScore {
   };
 }
 
+/** A saved round, and the code its answers page lives at. */
+export type SaveResult = {
+  ok: boolean;
+  /** Null when the round could not be saved, or when Supabase is not set up. */
+  code: string | null;
+};
+
 export async function saveRound(args: {
   playerId: string;
   collegeId: string;
   name: string;
   score: RoundScore;
   results: readonly PuzzleResult[];
-}): Promise<{ ok: boolean }> {
+}): Promise<SaveResult> {
   const { playerId, collegeId, name, score, results } = args;
 
   if (!supabase) {
@@ -54,34 +61,34 @@ export async function saveRound(args: {
     } catch {
       // Private browsing or full quota.
     }
-    return { ok: true };
+    return { ok: true, code: null };
   }
 
-  const { error } = await supabase.from('round_scores').insert({
-    player_id: playerId,
-    college_id: collegeId,
-    solved: score.solved,
-    total: score.total,
-    total_seconds: score.totalSeconds,
+  /**
+   * One call rather than two inserts. The round and its per-puzzle detail
+   * should not be able to half-succeed, and the share code has to come back
+   * with the write: it is generated in the database, where uniqueness can
+   * actually be enforced.
+   */
+  const { data, error } = await supabase.rpc('save_round', {
+    p_player_id: playerId,
+    p_college_id: collegeId,
+    p_solved: score.solved,
+    p_total: score.total,
+    p_total_seconds: score.totalSeconds,
+    p_results: results.map((r) => ({
+      puzzleId: r.puzzleId,
+      solved: r.solved,
+      seconds: r.seconds,
+      wrongGuesses: r.wrongGuesses,
+    })),
   });
 
-  // The leaderboard is driven by round_scores, so this one failing is what
-  // the player would notice. Per-puzzle results are secondary.
-  if (error) return { ok: false };
+  // The leaderboard is driven by this write, so a failure here is what the
+  // player would notice.
+  if (error) return { ok: false, code: null };
 
-  if (results.length > 0) {
-    await supabase.from('puzzle_results').insert(
-      results.map((r) => ({
-        player_id: playerId,
-        puzzle_id: r.puzzleId,
-        solved: r.solved,
-        seconds: r.seconds,
-        wrong_guesses: r.wrongGuesses,
-      })),
-    );
-  }
-
-  return { ok: true };
+  return { ok: true, code: typeof data === 'string' ? data : null };
 }
 
 /**

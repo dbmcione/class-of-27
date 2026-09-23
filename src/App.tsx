@@ -7,6 +7,8 @@ import { PuzzleScreen } from './screens/PuzzleScreen';
 import { DebriefScreen } from './screens/DebriefScreen';
 import { ScoreScreen } from './screens/ScoreScreen';
 import { RevealScreen } from './screens/RevealScreen';
+import { PlayAnswersScreen } from './screens/PlayAnswersScreen';
+import { playCodeFromUrl } from './lib/play';
 import { saveRound, summarise } from './lib/scores';
 import { loadSeen, recordServed, resetSeen } from './lib/seen';
 import { selectRound, type PuzzleResult } from './flow/round';
@@ -15,6 +17,12 @@ import { nextStep, type Step } from './flow/steps';
 import type { Session } from './flow/session';
 
 export function App() {
+  /**
+   * A /a/<code> address is a shared answers page, not the game. Read once on
+   * mount: nothing in the app navigates, so it cannot change underneath us.
+   */
+  const [playCode] = useState(() => playCodeFromUrl());
+
   const [step, setStep] = useState<Step>('landing');
   const [phone, setPhone] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -61,6 +69,17 @@ export function App() {
       cancelled = true;
     };
   }, [playerId, roundKey]);
+
+  if (playCode) {
+    return (
+      <div className="device">
+        <header className="topbar">
+          <img className="topbar-logo" src={logoUrl} alt="DBMCI" />
+        </header>
+        <PlayAnswersScreen code={playCode} />
+      </div>
+    );
+  }
 
   return (
     <div className="device">

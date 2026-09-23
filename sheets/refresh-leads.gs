@@ -19,6 +19,15 @@
 var VIEW = 'lead_export';
 
 /**
+ * The database stores the answers page's short code, not its address. The
+ * app's address belongs in one place, and that place is not a database
+ * column that would need a migration when the domain changes. Set GAME_URL
+ * in Script Properties and this turns the code into a link for the message.
+ */
+var CODE_COLUMN = 'answers_code';
+var LINK_COLUMN = 'answers_url';
+
+/**
  * Sorting is not cosmetic here. PostgREST pages with limit and offset, and
  * without an order the database may hand back the same row twice across two
  * pages and drop another. Phone is unique, so it orders the pages stably.
@@ -45,6 +54,11 @@ function refreshLeads() {
     return;
   }
 
+  var gameUrl = (props.getProperty('GAME_URL') || '').replace(/\/+$/, '');
+  rows = rows.map(function (row) {
+    return withAnswersLink_(row, gameUrl);
+  });
+
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
   var headers = Object.keys(rows[0]);
   writeHeadersIfMissing_(sheet, headers);
@@ -70,6 +84,19 @@ function refreshLeads() {
     .setValues(table);
 
   Logger.log('Added ' + fresh.length + ' new student(s).');
+}
+
+/** Swaps the short code for the link the automation actually sends. */
+function withAnswersLink_(row, gameUrl) {
+  var out = {};
+  Object.keys(row).forEach(function (k) {
+    if (k !== CODE_COLUMN) {
+      out[k] = row[k];
+      return;
+    }
+    out[LINK_COLUMN] = row[k] && gameUrl ? gameUrl + '/a/' + row[k] : '';
+  });
+  return out;
 }
 
 function writeHeadersIfMissing_(sheet, headers) {
