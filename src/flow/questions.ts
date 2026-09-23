@@ -17,14 +17,15 @@ export type Question = {
 export const ANSWER_OPTIONS = ['Sounds like me', 'Not really'] as const;
 export type AnswerOption = (typeof ANSWER_OPTIONS)[number];
 
+/**
+ * Three statements, down from seven. The keys are unchanged, so the answers
+ * already collected under them still line up; rows for the four that were
+ * dropped stay in player_answers as history and simply stop being written.
+ */
 export const QUESTIONS: readonly Question[] = [
   {
     key: 'timetable_slips',
     statement: 'My timetable ends up being more of a suggestion than a plan.',
-  },
-  {
-    key: 'tough_topic_deferred',
-    statement: 'When a topic feels tough, I set it aside and tell myself I’ll come back to it.',
   },
   {
     key: 'recall_under_pressure',
@@ -32,20 +33,8 @@ export const QUESTIONS: readonly Question[] = [
       'I understand the topic when someone explains it, but I struggle to recall and apply it when I’m solving questions.',
   },
   {
-    key: 'misses_details',
-    statement: 'I remember the broad concept but forget the small details that MCQs test.',
-  },
-  {
     key: 'postpones_mcqs',
     statement: 'I keep postponing MCQs until I’ve ‘finished studying’ the subject.',
-  },
-  {
-    key: 'momentum_dips',
-    statement: 'I study really well for a few days and then struggle to maintain the momentum.',
-  },
-  {
-    key: 'growing_backlog',
-    statement: 'I save notes, videos and questions for later, but my ‘later’ pile keeps growing.',
   },
 ];
 

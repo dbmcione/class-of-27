@@ -155,8 +155,8 @@ export function IntakeScreen({ phone, onDone }: Props) {
           />
         </div>
 
-        <h2 className="matrix-title">About Your Prep</h2>
-        <p className="matrix-intro">Mark each one as it applies to you.</p>
+        <h2 className="matrix-title">One More Step</h2>
+        <p className="matrix-intro">Does this sound like you?</p>
 
         <QuestionMatrix
           questions={QUESTIONS}
