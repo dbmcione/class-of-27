@@ -4,6 +4,23 @@ import { teaser, titleCaseAnswer } from '../flow/puzzle';
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
+/**
+ * The question sheet writes its explanations in paragraphs, and the argument
+ * moves one step per paragraph. Collapsing them into a single block would
+ * hide that structure, so each becomes its own <p>.
+ */
+function Prose({ text }: { text: string }) {
+  return (
+    <>
+      {text.split('\n\n').map((paragraph, i) => (
+        <p className="reveal-body" key={i}>
+          {paragraph}
+        </p>
+      ))}
+    </>
+  );
+}
+
 export function RevealCard({
   puzzle,
   index,
@@ -82,7 +99,7 @@ export function RevealCard({
 
       {open && (
         <div className="reveal-panel" id={panelId}>
-          <p className="reveal-body">{puzzle.definition}</p>
+          <Prose text={puzzle.definition} />
 
           <div className="reveal-section">
             <p className="reveal-label">Recent NEET PG PYQ</p>
@@ -102,7 +119,7 @@ export function RevealCard({
 
           <div className="reveal-section">
             <p className="reveal-label">Clinical decision flow</p>
-            <p className="reveal-body">{puzzle.explanation}</p>
+            <Prose text={puzzle.explanation} />
           </div>
         </div>
       )}

@@ -22,12 +22,13 @@ export const FIRST_ROUND_BANK: readonly Puzzle[] = [
     id: 'recall-fibromuscular-dysplasia',
     clue: 'A young woman with severe hypertension whose renal artery shows a "string of beads", alternating stenosis and dilatation.',
     answer: 'FIBROMUSCULAR DYSPLASIA',
-    definition:
-      'Fibromuscular dysplasia is a non-atherosclerotic, non-inflammatory disease of the arterial wall that causes stenosis, aneurysm, dissection or tortuosity of medium-sized arteries, most commonly the renal and carotid arteries.',
+    definition:'Fibromuscular dysplasia (FMD) is a non-atherosclerotic, non-inflammatory disease of the arterial wall that causes stenosis, aneurysm, dissection or tortuosity of medium-sized arteries, most commonly the renal and carotid arteries.',
     explanation:
-      'Severe hypertension in a 23-year-old with normal renal function and a clean urinalysis points away from renal parenchymal disease and towards a secondary, correctable cause. The string of beads on CT angiography is the giveaway: in a young woman that is fibromuscular dysplasia, not atherosclerotic stenosis. Because the hypertension is driven by a correctable renal artery lesion, percutaneous renal angioplasty is the definitive treatment. Stenting is reserved for angioplasty failure or dissection, and surgery for complex or aneurysmal disease.',
+      'A 23-year-old woman with severe hypertension (220/110 mmHg) despite normal renal function and no significant urinary abnormalities should raise suspicion for a secondary cause, particularly renovascular hypertension.\n\n' +
+      'CT angiography shows the characteristic “string-of-beads” appearance of the renal artery, alternating stenosis and dilatation which in a young woman, strongly suggests renal artery fibromuscular dysplasia (FMD) rather than atherosclerotic stenosis.\n\n' +
+      'As the hypertension is caused by a correctable renal artery lesion, percutaneous renal angioplasty is the preferred definitive treatment.',
     mcq: {
-      stem: 'A 23-year-old woman presents with a 6-month history of recurrent, severe headaches. The headaches are partially relieved by occasional analgesics but have progressively increased in frequency and severity. On examination, her blood pressure is 220/110 mmHg. Cardiovascular examination is unremarkable. Laboratory investigations reveal normal serum creatinine, normal serum electrolytes and normal urinalysis, with no significant proteinuria. CT angiography of the renal arteries shows a "string of beads" appearance. What is the most appropriate definitive treatment for this patient?',
+      stem: 'A 23-year-old woman presents with a 6-month history of recurrent, severe headaches. The headaches are partially relieved by occasional analgesics but have progressively increased in frequency and severity. On examination, her blood pressure is 220/110 mmHg. Cardiovascular examination is unremarkable. Laboratory investigations reveal normal serum creatinine, normal serum electrolytes and normal urinalysis, with no significant proteinuria. CT angiography of the renal arteries shows a “string-of-beads” appearance. What is the most appropriate definitive treatment for this patient?',
       options: [
         'Renal artery stenting',
         'Percutaneous renal angioplasty',
@@ -42,15 +43,17 @@ export const FIRST_ROUND_BANK: readonly Puzzle[] = [
     id: 'recall-primary-hyperaldosteronism',
     clue: 'Hypertension with low potassium and a metabolic alkalosis, high aldosterone and suppressed renin.',
     answer: 'PRIMARY HYPERALDOSTERONISM',
-    definition:
-      'Primary aldosteronism is autonomous, inappropriate secretion of aldosterone from the adrenal glands, independent of renin regulation. The excess aldosterone holds on to sodium and water while losing potassium and hydrogen ions, which is why it presents as hypertension, hypokalaemia and metabolic alkalosis.',
+    definition:'Primary aldosteronism is a condition characterized by autonomous, inappropriate secretion of aldosterone from the adrenal glands, independent of renin regulation. Excess aldosterone causes sodium and water retention with potassium and hydrogen ion loss, leading to hypertension, hypokalemia and metabolic alkalosis.',
     explanation:
-      'A high aldosterone with suppressed renin and a markedly raised aldosterone-to-renin ratio makes the diagnosis, and the positive saline loading test confirms the secretion is autonomous. CT of the abdomen comes first to look for an adrenal mass, but CT alone cannot say whether the aldosterone is coming from one gland or both. When surgery is on the table, adrenal vein sampling establishes laterality and decides whether a unilateral adrenalectomy will help. Biopsy is not routine and answers a different question entirely.',
+      'Hypertension with hypokalemia and metabolic alkalosis suggests mineralocorticoid excess. High aldosterone, suppressed renin and a markedly elevated aldosterone renin ratio suggest primary hyperaldosteronism. The positive saline loading test confirms autonomous aldosterone secretion.\n\n' +
+      'Once primary hyperaldosteronism is confirmed, CT abdomen is performed first to evaluate the adrenal glands for structural abnormalities and identify any adrenal mass. However, CT alone cannot reliably determine whether aldosterone excess is coming from one adrenal gland or both.\n\n' +
+      'Therefore, when the patient is being considered for potentially curative surgery, adrenal vein sampling (AVS) is performed to establish the functional laterality of aldosterone secretion and guide the decision regarding unilateral adrenalectomy.\n\n' +
+      'Although CT is appropriate for initial adrenal imaging, biopsy is not routinely indicated and does not establish functional laterality.',
     mcq: {
       stem: 'A 40-year-old hypertensive was found to have hypokalemia and metabolic alkalosis. He was evaluated for primary hyperaldosteronism and was found to have high aldosterone and low renin. The aldosterone renin ratio is >210. Saline loading test is positive. Which of the following is the next step in the further management of this patient?',
       options: [
         'CT abdomen with adrenal biopsy',
-        'Adrenal vein sampling',
+        'Adrenal Vein sampling',
         'MRI abdomen',
         'MIBG',
       ],
@@ -62,12 +65,13 @@ export const FIRST_ROUND_BANK: readonly Puzzle[] = [
     id: 'recall-aortic-dissection',
     clue: 'Sudden tearing chest pain going through to between the shoulder blades, unequal arm blood pressures, a widened mediastinum.',
     answer: 'AORTIC DISSECTION',
-    definition:
-      'Aortic dissection is a tear in the aortic intima that allows blood into the aortic media, separating the layers of the aortic wall and forming a false lumen.',
+    definition:'Aortic dissection is a condition in which a tear in the aortic intima allows blood to enter the aortic media, causing separation of the layers of the aortic wall and formation of a false lumen.',
     explanation:
-      'Poorly controlled hypertension, sudden severe chest pain radiating between the shoulder blades, a blood pressure difference between the arms and a widened mediastinum together make this the diagnosis to exclude first. In a haemodynamically stable patient, contrast-enhanced CT angiography of the chest is the investigation of choice: it is fast and shows both the dissection and how far it extends. Normal creatinine and no iodinated contrast allergy remove the usual reasons to avoid it. Transoesophageal echocardiography is the alternative when the patient is too unstable to travel or CT is not possible.',
+      'A 68-year-old man with poorly controlled hypertension and sudden severe chest pain radiating to the interscapular region raises strong suspicion for acute aortic dissection. The inter-arm blood pressure difference further supports this, while a widened mediastinum on chest X-ray provides an important radiological clue.\n\n' +
+      'In a hemodynamically stable patient, contrast-enhanced CT angiography of the chest is the preferred investigation because it rapidly provides detailed visualization of the aorta and the extent of dissection. Normal renal function and no known iodinated contrast allergy further support its use.\n\n' +
+      'TEE is preferred when echocardiographic imaging is required in a hemodynamically unstable patient or when CT angiography cannot be performed, as it provides better visualization of the thoracic aorta.',
     mcq: {
-      stem: 'A 68-year-old man with poorly controlled hypertension presents to the emergency department with sudden-onset, severe chest pain radiating to the interscapular region. On examination, blood pressure in the right arm is 180/95 mmHg and in the left arm 150/90 mmHg, pulse rate 110/min, respiratory rate 29/min, SpO2 98% on room air. A chest X-ray demonstrates widening of the mediastinum. ECG shows sinus tachycardia without ischemic changes. Serum creatinine is 0.9 mg/dl and there is no known drug allergy to iodinated dye. What is the most appropriate investigation to confirm the diagnosis in this patient?',
+      stem: 'A 68-year-old man with poorly controlled hypertension presents to the emergency department with sudden-onset, severe chest pain radiating to the interscapular region. On examination, blood pressure in the right arm - 180/95 mmHg and left arm - 150/90 mmHg and pulse rate - 110/min, respiratory rate - 29/min, SpO2 - 98% on room air. A chest X-ray demonstrates widening of the mediastinum. ECG shows sinus tachycardia without ischemic changes. Serum creatinine is 0.9 mg/dl and there is no known drug allergy to iodinated dye. What is the most appropriate investigation to confirm the diagnosis in this patient?',
       options: [
         'Contrast-enhanced CT angiography of chest',
         'Ventilation-perfusion scan',
@@ -82,10 +86,11 @@ export const FIRST_ROUND_BANK: readonly Puzzle[] = [
     id: 'recall-vestibular-schwannoma',
     clue: 'One-sided sensorineural hearing loss with tinnitus, plus numbness of the posterosuperior ear canal (Hitselberger sign).',
     answer: 'VESTIBULAR SCHWANNOMA',
-    definition:
-      'Vestibular schwannoma is a benign, usually slow-growing Schwann cell tumour arising from the vestibular portion of the vestibulocochlear nerve (CN VIII), typically presenting with unilateral hearing loss, tinnitus and vestibular symptoms.',
+    definition:'Vestibular schwannoma is a benign, usually slow-growing Schwann-cell tumour arising from the vestibular portion of the vestibulocochlear nerve (CN VIII), typically presenting with unilateral hearing loss, tinnitus and vestibular symptoms.',
     explanation:
-      'Progressive one-sided sensorineural hearing loss with tinnitus is retrocochlear until proven otherwise, and reduced sensation over the posterosuperior external auditory canal points at the nerve and the cerebellopontine angle around it. Gadolinium-enhanced MRI of the cerebellopontine angle is the investigation of choice because the diagnosis needs the mass to be seen: it images the internal auditory canal well enough to pick up even small intracanalicular tumours. Pure-tone audiometry and BERA can show that the lesion is sensorineural or retrocochlear but cannot show the tumour, and high-resolution CT gives good bone detail while missing small ones.',
+      'A 38-year-old woman with progressive unilateral sensorineural hearing loss and intermittent tinnitus raises suspicion for a retrocochlear lesion, particularly vestibular schwannoma. The decreased sensation over the posterosuperior external auditory canal further supports involvement of the vestibulocochlear nerve and adjacent cerebellopontine-angle structures.\n\n' +
+      'With these findings suggesting a cerebellopontine-angle lesion, gadolinium-enhanced MRI of the cerebellopontine angle is the investigation of choice because it provides excellent visualization of the internal auditory canal and cerebellopontine-angle region and can detect even small vestibular schwannomas.\n\n' +
+      'Therefore, contrast-enhanced MRI is preferred over physiological hearing tests or CT, as the diagnosis requires direct visualization and assessment of the retrocochlear mass. Pure-tone audiometry and BERA can establish or suggest sensorineural/retrocochlear pathology but cannot visualize the tumor, while high-resolution CT provides good bony detail but is less sensitive for small, particularly intracanalicular, vestibular schwannomas.',
     mcq: {
       stem: 'A 38-year-old woman presents with a progressive unilateral sensorineural hearing loss associated with intermittent tinnitus. She also reports decreased sensation over the posterosuperior aspect of the auditory canal. There is no history of head trauma. Which of the following is the most appropriate investigation to establish the diagnosis?',
       options: [
@@ -111,17 +116,17 @@ export const FIRST_ROUND_BANK: readonly Puzzle[] = [
     id: 'recall-abdominal-compartment-syndrome',
     clue: 'Intra-abdominal pressure above 20 mmHg after major trauma, with new organ dysfunction to go with it.',
     answer: 'ABDOMINAL COMPARTMENT SYNDROME',
-    definition:
-      'Abdominal compartment syndrome is intra-abdominal pressure that rises persistently above 20 mmHg and is associated with new-onset organ dysfunction or failure.',
+    definition:'Abdominal compartment syndrome (ACS) is a condition in which intra-abdominal pressure (IAP) rises persistently to >20 mmHg and is associated with new-onset organ dysfunction or failure.',
     explanation:
-      'In this polytrauma patient the bilateral femur and tibia fractures carry a large hidden blood loss, and the hypotension says the physiology is already failing. That makes damage control orthopaedics the approach: stabilise the fractures quickly and temporarily rather than spending hours on definitive fixation while the patient is unstable. So after haemodynamic stabilisation, external fixation of both the femur and the tibia is the right next step, with nailing or plating deferred until the patient can tolerate it.',
+      'A patient with polytrauma and bilateral femur and tibia fractures is at high risk of major blood loss and systemic physiological stress. Hypotension indicates physiological instability, making damage-control orthopedics (DCO) the preferred approach: rapid, temporary fracture stabilization while minimizing operative time and additional physiological stress.\n\n' +
+      'Therefore, after hemodynamic stabilization, external fixation of both femur and tibia is appropriate. Definitive fixation with nailing or plating can be performed later once the patient is physiologically stable.',
     mcq: {
       stem: 'A patient is brought to the emergency department following an RTA. He has sustained bilateral fracture of both the femur and tibia. On examination, he is hypotensive, London sign is positive in the right flank. Which of the following is the next best step in management after hemodynamic stabilisation?',
       options: [
         'External fixation of femur and nailing of tibia plating',
         'External fixation of tibia and nailing of femur',
         'External fixation of both femur and tibia',
-        "Nailing or plating based on the surgeon's experience, whichever saves time",
+        'Nailing or plating based on the surgeon\'s experience, whichever saves time',
       ],
       correctIndex: 2,
     },

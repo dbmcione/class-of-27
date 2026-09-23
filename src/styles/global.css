@@ -964,6 +964,12 @@ code {
   color: rgba(226, 232, 250, 0.78);
 }
 
+/* Space between paragraphs, but none before the first or after the last:
+   the section's own padding already owns those edges. */
+.reveal-body + .reveal-body {
+  margin-top: 11px;
+}
+
 /* The question and the reasoning are the same kind of thing: a labelled
    block under a hairline. They share the rule so they cannot drift apart. */
 .reveal-section {
