@@ -16,7 +16,7 @@ export function RevealScreen({ puzzles, results, onPlayAgain }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
 
   return (
-    <div className="screen">
+    <div className="screen reveal-screen">
       <h1>The Answers</h1>
       <p className="sub">
         You solved {solvedCount} of {results.length}. Tap any card for the full explanation.

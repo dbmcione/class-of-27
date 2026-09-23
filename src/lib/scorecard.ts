@@ -65,25 +65,12 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
   });
 }
 
-const FONT = 'Fredoka, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-
 /**
- * Canvas does not wait for a webfont. If the card is drawn before Fredoka has
- * loaded, every line silently renders in the fallback and the image ships
- * looking nothing like the app. Each weight has to be asked for by name.
+ * The card deliberately does not use Fredoka. It is the system stack, as it
+ * was before the app switched fonts, and so is the answers page. No webfont
+ * means nothing to wait for before the first draw.
  */
-async function fontsReady(): Promise<void> {
-  if (!('fonts' in document)) return;
-  try {
-    await Promise.all(
-      ['500 29px Fredoka', '600 30px Fredoka', '700 50px Fredoka'].map((f) =>
-        document.fonts.load(f),
-      ),
-    );
-  } catch {
-    // A font that refuses to load is not a reason to withhold the scorecard.
-  }
-}
+const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 
 function drawBackground(ctx: CanvasRenderingContext2D): void {
   const sky = ctx.createLinearGradient(0, 0, 0, H);
@@ -146,7 +133,6 @@ export async function generateScorecard(
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
 
-  await fontsReady();
   drawBackground(ctx);
 
   const logo = await loadImage(logoUrl);
@@ -166,7 +152,7 @@ export async function generateScorecard(
 
   // --- Score, with room to breathe before the time line.
   const scoreText = `${input.solved}/${input.total}`;
-  ctx.font = `700 210px ${FONT}`;
+  ctx.font = `800 210px ${FONT}`;
   const scoreGrad = ctx.createLinearGradient(W / 2 - 220, 0, W / 2 + 220, 0);
   scoreGrad.addColorStop(0, '#46e6b3');
   scoreGrad.addColorStop(0.5, '#4fd1ff');
