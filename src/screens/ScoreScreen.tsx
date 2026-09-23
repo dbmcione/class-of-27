@@ -175,7 +175,7 @@ export function ScoreScreen({
           }}
         >
           <ShareIcon />
-          {sharing ? 'Preparing…' : 'Share My Scorecard'}
+          {sharing ? 'Preparing…' : 'Challenge a friend'}
         </button>
 
         <p className="share-note" role="status">
