@@ -112,7 +112,12 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
       'and metabolic alkalosis.',
     tough: [
       'Integrated between subjects: Medicine and Radiology',
-      'Clinical decision making – best choice',
+      'Clinical decision making: The patient has confirmed primary ' +
+      'hyperaldosteronism. The next step is to determine whether the excess ' +
+      'aldosterone is unilateral or bilateral, which is done by adrenal vein ' +
+      'sampling. Although CT is performed before AVS, Option A is incorrect ' +
+      'because it includes adrenal biopsy and biopsy is not routinely done ' +
+      'before establishing lateralization.',
       'Clinical scenario',
     ],
     mcq: {
