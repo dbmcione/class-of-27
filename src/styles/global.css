@@ -170,6 +170,11 @@ body {
    The 25px ceiling is for desktop, where the frame is a fixed 430px wide and
    vw describes the window instead. Only this title: the other h1s are short
    and have no reason to shrink. */
+.challenge-title,
+.challenge-title + .sub {
+  text-align: center;
+}
+
 .challenge-title {
   font-size: clamp(16px, calc(6.5vw - 3px), 25px);
 }
@@ -615,6 +620,9 @@ code {
 
 .centred-block .sub {
   max-width: 34ch;
+  /* This screen has one short paragraph and nothing competing with it, so the
+     lede can run larger than the 14px the denser screens need. */
+  font-size: 16px;
 }
 
 /* --- Puzzle --------------------------------------------------------------- */

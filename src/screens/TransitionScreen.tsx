@@ -18,8 +18,8 @@ export function TransitionScreen({ name, questionCount, ready, onStart }: Props)
         <p className="badge">Ready, {firstName(name)}?</p>
         <h1>Let’s Start The Game</h1>
         <p className="sub">
-          {questionCount || 5} questions. 5 guesses each. Score and time go on the
-          leaderboard.
+          {questionCount || 5} diagnoses. 5 guesses each. How many can you spot?
+          Play again to take on a new set of cases.
         </p>
       </div>
       <button className="btn" type="button" disabled={!ready} onClick={onStart}>
