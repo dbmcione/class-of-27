@@ -7,4 +7,4 @@ export const CHALLENGE_NAME = 'Class of ’27: Spot the Diagnosis';
 
 export const CHALLENGE_DESCRIPTION =
   'Can you spot the diagnosis? Solve the puzzle, see how NEET PG tests the ' +
-  'topic, and find out where you stand against your college.';
+  'topic and find out where you stand against your college.';
