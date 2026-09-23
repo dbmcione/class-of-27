@@ -37,7 +37,7 @@ export function DebriefScreen({ onContinue }: Props) {
       </ul>
 
       <button className="btn debrief-cta" type="button" onClick={onContinue}>
-        Show My Score
+        Next
       </button>
     </div>
   );

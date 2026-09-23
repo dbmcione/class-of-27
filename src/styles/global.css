@@ -1419,7 +1419,9 @@ code {
    with the type instead of a hard return. */
 .debrief-intro {
   text-align: center;
-  margin-bottom: 34px;
+  /* One blank line between blocks. 24px of copy at line-height 1.5 makes a
+     line 36px tall, so that is what each gap gains over its old value. */
+  margin-bottom: 70px;
 }
 
 .debrief-intro p {
@@ -1430,11 +1432,11 @@ code {
 }
 
 .debrief-intro p + p {
-  margin-top: 22px;
+  margin-top: 58px;
 }
 
 .debrief-kicker {
-  margin: 0 0 20px;
+  margin: 0 0 56px;
   font-size: 24px;
   line-height: 1.5;
   color: var(--ink);
