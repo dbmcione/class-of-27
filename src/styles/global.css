@@ -194,7 +194,7 @@ p.sub {
   background: linear-gradient(90deg, rgba(70, 230, 179, 0.28), rgba(155, 123, 255, 0.28));
   border: 1px solid rgba(255, 255, 255, 0.18);
   color: #eafff6;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 11.5px;
   letter-spacing: 0.02em;
   padding: 5px 12px;
@@ -438,7 +438,7 @@ label {
   background: var(--pill-bg);
   color: var(--pill-ink);
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 500;
   font-family: inherit;
   cursor: pointer;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
@@ -850,7 +850,7 @@ code {
 .outcome-title {
   margin: 4px 0 6px;
   font-size: 21px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.3;
   letter-spacing: var(--heading-tracking);
   color: var(--ink);
@@ -865,7 +865,7 @@ code {
 
 .outcome-answer strong {
   color: var(--ink);
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .outcome .btn {
