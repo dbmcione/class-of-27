@@ -893,16 +893,6 @@ code {
   margin-bottom: 7px;
 }
 
-.reveal-clue {
-  display: block;
-  font-size: 13px;
-  line-height: 1.55;
-  color: rgba(159, 176, 217, 0.85);
-  padding-left: 11px;
-  border-left: 2px solid rgba(255, 255, 255, 0.14);
-  margin-bottom: 12px;
-}
-
 /* Cut mid-word, faded out — the card should read as unfinished. */
 .reveal-teaser {
   display: block;

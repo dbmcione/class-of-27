@@ -82,7 +82,6 @@ export function RevealCard({
         </span>
 
         <span className="reveal-answer">{titleCaseAnswer(puzzle.answer)}</span>
-        <span className="reveal-clue">{puzzle.clue}</span>
 
         {!open && (
           <span className="reveal-teaser">
