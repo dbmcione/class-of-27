@@ -1435,9 +1435,14 @@ code {
   margin-top: 58px;
 }
 
+/* Has to hold one line. At 24px it measures 394px against the 342px a 390px
+   phone has, so the size follows the screen: the calc is the largest that
+   still fits, checked from 320 to 430px. The 22px ceiling is for desktop,
+   where the frame is a fixed 430px and vw describes the window instead.
+   No gap worth the name below it, since it introduces the list. */
 .debrief-kicker {
-  margin: 0 0 56px;
-  font-size: 24px;
+  margin: 0 0 18px;
+  font-size: clamp(14px, calc(5.9vw - 3px), 22px);
   line-height: 1.5;
   color: var(--ink);
 }
