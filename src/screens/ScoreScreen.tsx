@@ -98,7 +98,7 @@ export function ScoreScreen({
   }, [college.id, pendingSave]);
 
   return (
-    <div className="screen">
+    <div className="screen score-screen">
       <div className="score-hero">
         <p className="score-college">{college.name}</p>
         <p className="score-big">

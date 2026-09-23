@@ -49,6 +49,11 @@
      negative tracking tuned for the old system font, which made them read as
      congested. Headings only: body text and the uppercase micro-labels have
      their own spacing already. */
+  /* The stack the app used before Fredoka. The score page, the answers page
+     and the scorecard image all stay on it. Kept as a token so the three
+     cannot drift apart; the card's copy lives in scorecard.ts. */
+  --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
   --heading-tracking: 0.03em;
   /* Small type wants proportionally more room than large type does, so the
      15px and 14px headings get their own, wider value. */
@@ -1095,15 +1100,15 @@ code {
   font-size: min(15px, calc(230px / var(--maxlen)));
 }
 
-/* --- Answers page: the pre-Fredoka typography ----------------------------
-   This page and the scorecard image deliberately stay on the system stack
-   with the weights and tracking they had before the app moved to Fredoka.
-   Everything else is Fredoka. Keep the two in step: the card is drawn from
-   `FONT` in scorecard.ts, which carries the same stack.
+/* --- The screens that stay on the old typeface ---------------------------
+   The score page, the answers page and the scorecard image keep the system
+   stack and the weights and tracking they had before the app moved to
+   Fredoka. Everything else is Fredoka, so this hangs off a class on each
+   screen rather than touching the body.
    ------------------------------------------------------------------------ */
-.reveal-screen {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif;
+.reveal-screen,
+.score-screen {
+  font-family: var(--font-system);
 }
 
 .reveal-screen h1 {

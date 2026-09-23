@@ -67,8 +67,10 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
 
 /**
  * The card deliberately does not use Fredoka. It is the system stack, as it
- * was before the app switched fonts, and so is the answers page. No webfont
- * means nothing to wait for before the first draw.
+ * was before the app switched fonts, and so are the score and answers pages.
+ * Canvas cannot read a CSS custom property, so this is the second copy of
+ * `--font-system` in global.css: change one and change the other. No webfont
+ * also means nothing to wait for before the first draw.
  */
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 
