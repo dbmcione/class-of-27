@@ -46,10 +46,9 @@ var RESULT_PENDING = 'Pending';
  * the image to Storage named after it. That is the whole reason no column had
  * to be added to the database: the code IS the filename.
  *
- * This column is appended LAST, after result, and it has to stay last. The
- * row values are written in this object's key order, so moving it earlier
- * would write card URLs into the result column on a sheet that already has
- * the older header — which Make reads by name and would not notice.
+ * It sits next to the answers link, before result, because the two links
+ * belong together and result is the automation's own column. Order is safe to
+ * change here: the sheet is reconciled by NAME, not by position.
  */
 var CARD_COLUMN = 'card_url';
 var CARD_BUCKET = 'scorecards';
@@ -88,8 +87,9 @@ function refreshLeads() {
   });
 
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-  var headers = Object.keys(rows[0]);
-  ensureHeaders_(sheet, headers);
+  // The sheet's own header, which may be wider than ours if someone has added
+  // a column of their own. Rows are written to match it.
+  var headers = ensureHeaders_(sheet, Object.keys(rows[0]));
 
   var known = existingPhones_(sheet);
   var fresh = rows.filter(function (row) {
@@ -111,6 +111,7 @@ function refreshLeads() {
 
   var table = fresh.map(function (row) {
     return headers.map(function (h) {
+      // A column of someone else's gets an empty cell, not a guess.
       return row[h] === null || row[h] === undefined ? '' : row[h];
     });
   });
@@ -138,12 +139,12 @@ function withLinks_(row, gameUrl, apiUrl) {
     out[LINK_COLUMN] = code && gameUrl ? gameUrl + '/a/' + code : '';
   });
 
-  out[RESULT_COLUMN] = RESULT_PENDING;
-  // Last, and see CARD_COLUMN above for why it must stay last.
   out[CARD_COLUMN] =
     code && apiUrl
       ? apiUrl + '/storage/v1/object/public/' + CARD_BUCKET + '/' + code + '.jpg'
       : '';
+  // Last, because it is the automation's, not ours.
+  out[RESULT_COLUMN] = RESULT_PENDING;
   return out;
 }
 
@@ -159,12 +160,17 @@ function imageExists_(imageUrl) {
 }
 
 /**
- * Writes the header on an empty sheet, and extends it when a column has been
- * added since. Without the second part a sheet that already had rows would
- * keep its old header while new rows arrived a column wider, and the
- * automation, which finds its column by name, would quietly stop working.
+ * Makes the sheet's header match the columns we have, and returns the header
+ * as the sheet now actually reads it.
  *
- * Only ever touches row 1. Existing rows keep whatever they had.
+ * Everything downstream works off that returned list rather than off our own
+ * order, which is what lets a column be added in the middle. A new column is
+ * INSERTED at its proper place, so the cells to its right shift with it and
+ * every existing row keeps its values under the right heading — including
+ * result, which by then holds what Make wrote.
+ *
+ * Columns are never moved or removed, only added. A heading someone has added
+ * by hand is left exactly where it is.
  */
 function ensureHeaders_(sheet, headers) {
   if (sheet.getLastRow() === 0) {
@@ -174,19 +180,44 @@ function ensureHeaders_(sheet, headers) {
     // Sheets would be free to render it as 9.87654E+09 and hand that to the
     // automation.
     sheet.getRange(2, 1, sheet.getMaxRows() - 1, 1).setNumberFormat('@');
-    return;
+    return headers.slice();
   }
 
-  var existing = sheet.getRange(1, 1, 1, Math.max(1, sheet.getLastColumn())).getValues()[0];
-  var missing = [];
-  for (var i = existing.length; i < headers.length; i++) missing.push(headers[i]);
-  if (missing.length === 0) return;
+  var current = sheet
+    .getRange(1, 1, 1, Math.max(1, sheet.getLastColumn()))
+    .getValues()[0]
+    .map(function (h) {
+      return String(h).trim();
+    });
 
-  sheet
-    .getRange(1, existing.length + 1, 1, missing.length)
-    .setValues([missing])
-    .setFontWeight('bold');
-  Logger.log('Added header(s): ' + missing.join(', '));
+  var added = [];
+
+  headers.forEach(function (name) {
+    if (current.indexOf(name) !== -1) return;
+
+    // Where it belongs: just after the column that precedes it in our order
+    // and is already on the sheet. Falling back to the far right when none of
+    // them is, which is the case for a sheet with a header we do not know.
+    var at = current.length;
+    var ours = headers.indexOf(name);
+    for (var i = ours - 1; i >= 0; i--) {
+      var beforeAt = current.indexOf(headers[i]);
+      if (beforeAt !== -1) {
+        at = beforeAt + 1;
+        break;
+      }
+    }
+
+    if (at < current.length) {
+      sheet.insertColumnBefore(at + 1);
+    }
+    sheet.getRange(1, at + 1).setValue(name).setFontWeight('bold');
+    current.splice(at, 0, name);
+    added.push(name);
+  });
+
+  if (added.length > 0) Logger.log('Added column(s): ' + added.join(', '));
+  return current;
 }
 
 /** Phones already in column A, as a lookup. */
