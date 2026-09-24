@@ -191,7 +191,6 @@ export function ScoreScreen({
             }}
           >
             See Leaderboard
-            {place ? ` (${place.boardSize} playing)` : ''}
           </button>
         </>
       )}

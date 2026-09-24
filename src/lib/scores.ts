@@ -98,7 +98,11 @@ export async function saveRound(args: {
 /** Where one student sits on their college board, counted over the whole of it. */
 export type BoardPlace = {
   entry: LeaderboardEntry;
-  /** How many students have a place on this board. */
+  /**
+   * How many students have a place on this board. Nothing renders it today;
+   * it comes back from the same query as the rank, so it costs nothing to
+   * keep and saves a second round trip if the count is ever wanted.
+   */
   boardSize: number;
 };
 
