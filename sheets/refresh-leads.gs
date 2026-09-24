@@ -28,6 +28,14 @@ var CODE_COLUMN = 'answers_code';
 var LINK_COLUMN = 'answers_url';
 
 /**
+ * The code is kept as a column of its own, beside the link it is part of,
+ * because the automation wants the bare code as well as the address. It is
+ * the same value the view already returns, not a second thing to keep in
+ * step: the link is built from it a few lines below.
+ */
+var KEEP_CODE_COLUMN = true;
+
+/**
  * The automation's own column. Every new row starts Pending and Make writes
  * Success or Failure over it once it has sent. Added here and not in the
  * database, because it records what Make did, which the database has no way
@@ -136,7 +144,10 @@ function withLinks_(row, gameUrl, apiUrl) {
       out[k] = row[k];
       return;
     }
+    // The link first, then the bare code beside it. Key order here is the
+    // column order on the sheet.
     out[LINK_COLUMN] = code && gameUrl ? gameUrl + '/a/' + code : '';
+    if (KEEP_CODE_COLUMN) out[CODE_COLUMN] = code || '';
   });
 
   out[CARD_COLUMN] =
