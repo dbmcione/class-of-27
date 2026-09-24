@@ -6,11 +6,13 @@ import {
   type BoardPlace,
   type LeaderboardEntry,
   type RoundScore,
+  type SaveResult,
 } from '../lib/scores';
 import { Leaderboard } from '../components/Leaderboard';
 import { LeaderboardModal } from '../components/LeaderboardModal';
 import { shareScorecard, shareHint } from '../lib/share';
 import { generateScorecard } from '../lib/scorecard';
+import { uploadScorecard } from '../lib/cards';
 import type { College } from '../lib/colleges';
 
 type Props = {
@@ -18,8 +20,12 @@ type Props = {
   playerName: string;
   college: College;
   score: RoundScore;
-  /** Resolves once this round's score has been written. */
-  pendingSave: Promise<{ ok: boolean }> | null;
+  /**
+   * Resolves once this round's score has been written, carrying the code the
+   * database minted for it — the answers page's address, and the scorecard's
+   * filename in the bucket.
+   */
+  pendingSave: Promise<SaveResult> | null;
   onSeeAnswers: () => void;
 };
 
@@ -110,9 +116,18 @@ export function ScoreScreen({
     timeLabel: formatMinutesSeconds(score.totalSeconds),
   };
 
+  /**
+   * Drawn once, used twice: shown as the preview, and uploaded so the
+   * marketing message can attach the very image the student saw. Held in a
+   * ref rather than started inside an effect because two consumers need it
+   * and neither should trigger a second draw.
+   */
+  const cardRef = useRef<ReturnType<typeof generateScorecard> | null>(null);
+  if (cardRef.current === null) cardRef.current = generateScorecard(scorecard);
+
   useEffect(() => {
     let cancelled = false;
-    void generateScorecard(scorecard).then((card) => {
+    void cardRef.current?.then((card) => {
       if (!cancelled) setPreview(card?.dataUrl ?? null);
     });
     return () => {
@@ -147,6 +162,27 @@ export function ScoreScreen({
       cancelled = true;
     };
   }, [college.id, playerId, pendingSave]);
+
+  /**
+   * The card goes to the bucket under this round's own code, which is what
+   * lets the sheet work out its address without storing one.
+   *
+   * Nothing here is cancelled on unmount, unlike every other effect on this
+   * screen. A student who taps through to the answers a second after the
+   * score lands still needs their card uploaded, and there is no state to
+   * set afterwards that a gone screen would care about. A failure is ignored
+   * on purpose: they have their score, and the only cost is a later message
+   * without a picture.
+   */
+  useEffect(() => {
+    void (async () => {
+      const saved = pendingSave ? await pendingSave : null;
+      if (!saved?.code) return;
+      const card = await cardRef.current;
+      if (card) await uploadScorecard(saved.code, card.blob);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingSave]);
 
   return (
     <div className="screen score-screen">

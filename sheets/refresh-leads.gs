@@ -40,6 +40,21 @@ var RESULT_COLUMN = 'result';
 var RESULT_PENDING = 'Pending';
 
 /**
+ * The student's scorecard, for the message to attach.
+ *
+ * Built from the same code as the answers link, because the browser uploads
+ * the image to Storage named after it. That is the whole reason no column had
+ * to be added to the database: the code IS the filename.
+ *
+ * This column is appended LAST, after result, and it has to stay last. The
+ * row values are written in this object's key order, so moving it earlier
+ * would write card URLs into the result column on a sheet that already has
+ * the older header — which Make reads by name and would not notice.
+ */
+var CARD_COLUMN = 'card_url';
+var CARD_BUCKET = 'scorecards';
+
+/**
  * Sorting is not cosmetic here. PostgREST pages with limit and offset, and
  * without an order the database may hand back the same row twice across two
  * pages and drop another. Phone is unique, so it orders the pages stably.
@@ -67,8 +82,9 @@ function refreshLeads() {
   }
 
   var gameUrl = (props.getProperty('GAME_URL') || '').replace(/\/+$/, '');
+  var apiUrl = url.replace(/\/+$/, '');
   rows = rows.map(function (row) {
-    return withAnswersLink_(row, gameUrl);
+    return withLinks_(row, gameUrl, apiUrl);
   });
 
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
@@ -85,6 +101,14 @@ function refreshLeads() {
     return;
   }
 
+  // Only the rows about to be written, never the whole database. A card can
+  // be missing when the student's phone dropped off the network before the
+  // upload finished, and a link to a file that is not there would reach them
+  // as a broken image. Blank is better: the automation can send text only.
+  fresh.forEach(function (row) {
+    if (row[CARD_COLUMN] && !imageExists_(row[CARD_COLUMN])) row[CARD_COLUMN] = '';
+  });
+
   var table = fresh.map(function (row) {
     return headers.map(function (h) {
       return row[h] === null || row[h] === undefined ? '' : row[h];
@@ -98,18 +122,40 @@ function refreshLeads() {
   Logger.log('Added ' + fresh.length + ' new student(s).');
 }
 
-/** Swaps the short code for the link the automation actually sends. */
-function withAnswersLink_(row, gameUrl) {
+/**
+ * Turns the play's short code into the two links the automation sends: the
+ * answers page and the scorecard image. Both are derived, neither is stored.
+ */
+function withLinks_(row, gameUrl, apiUrl) {
+  var code = row[CODE_COLUMN];
   var out = {};
+
   Object.keys(row).forEach(function (k) {
     if (k !== CODE_COLUMN) {
       out[k] = row[k];
       return;
     }
-    out[LINK_COLUMN] = row[k] && gameUrl ? gameUrl + '/a/' + row[k] : '';
+    out[LINK_COLUMN] = code && gameUrl ? gameUrl + '/a/' + code : '';
   });
+
   out[RESULT_COLUMN] = RESULT_PENDING;
+  // Last, and see CARD_COLUMN above for why it must stay last.
+  out[CARD_COLUMN] =
+    code && apiUrl
+      ? apiUrl + '/storage/v1/object/public/' + CARD_BUCKET + '/' + code + '.jpg'
+      : '';
   return out;
+}
+
+/** Is the card actually in the bucket? A HEAD, so nothing is downloaded. */
+function imageExists_(imageUrl) {
+  try {
+    var res = UrlFetchApp.fetch(imageUrl, { method: 'head', muteHttpExceptions: true });
+    return res.getResponseCode() === 200;
+  } catch (err) {
+    // A blip at this end is not evidence the card is missing. Keep the link.
+    return true;
+  }
 }
 
 /**

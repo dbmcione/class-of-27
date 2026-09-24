@@ -8,7 +8,7 @@ import { ScoreScreen } from './screens/ScoreScreen';
 import { RevealScreen } from './screens/RevealScreen';
 import { PlayAnswersScreen } from './screens/PlayAnswersScreen';
 import { playCodeFromUrl } from './lib/play';
-import { saveRound, summarise } from './lib/scores';
+import { saveRound, summarise, type SaveResult } from './lib/scores';
 import { loadSeen, recordServed, resetSeen } from './lib/seen';
 import { selectRound, type PuzzleResult } from './flow/round';
 import type { Puzzle } from './flow/bank';
@@ -34,7 +34,7 @@ export function App() {
    * before loading the leaderboard, otherwise it reads the board before the
    * player's own row has landed and reports "no scores yet".
    */
-  const [pendingSave, setPendingSave] = useState<Promise<{ ok: boolean }> | null>(null);
+  const [pendingSave, setPendingSave] = useState<Promise<SaveResult> | null>(null);
 
   function advance() {
     setStep((s) => nextStep(s));
