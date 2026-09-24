@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { formatDuration, formatMinutesSeconds } from '../flow/puzzle';
-import { fetchLeaderboard, type LeaderboardEntry, type RoundScore } from '../lib/scores';
+import {
+  fetchLeaderboard,
+  fetchOwnPlace,
+  type BoardPlace,
+  type LeaderboardEntry,
+  type RoundScore,
+} from '../lib/scores';
+import { Leaderboard } from '../components/Leaderboard';
+import { LeaderboardModal } from '../components/LeaderboardModal';
 import { shareScorecard, shareHint } from '../lib/share';
 import { generateScorecard } from '../lib/scorecard';
 import type { College } from '../lib/colleges';
@@ -34,6 +42,37 @@ function verdict(solved: number, total: number): string {
   return 'Room to grow.';
 }
 
+/**
+ * The five, plus this student's own row when they are not already among them.
+ * Their row is appended rather than the list being extended to reach it: the
+ * point is to show where they stand without printing the eighteen names in
+ * between.
+ */
+function withOwnRow(
+  top: readonly LeaderboardEntry[],
+  place: BoardPlace | null,
+  count: number,
+): LeaderboardEntry[] {
+  const rows = top.slice(0, count);
+  if (!place) return rows;
+  if (rows.some((r) => r.playerId === place.entry.playerId)) return rows;
+  return [...rows, place.entry];
+}
+
+/** The rank the gap marker sits above, or undefined when the rows are adjacent. */
+function gapAfterRank(
+  top: readonly LeaderboardEntry[],
+  place: BoardPlace | null,
+  count: number,
+): number | undefined {
+  if (!place) return undefined;
+  const rows = top.slice(0, count);
+  if (rows.some((r) => r.playerId === place.entry.playerId)) return undefined;
+  const last = rows[rows.length - 1];
+  if (!last || place.entry.rank === last.rank + 1) return undefined;
+  return place.entry.rank;
+}
+
 export function ScoreScreen({
   playerId,
   playerName,
@@ -42,8 +81,14 @@ export function ScoreScreen({
   pendingSave,
   onSeeAnswers,
 }: Props) {
+  /** The five shown on the page. The popup fetches the rest on demand. */
+  const TOP = 5;
+
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
+  const [place, setPlace] = useState<BoardPlace | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showFull, setShowFull] = useState(false);
+  const [fullBoard, setFullBoard] = useState<LeaderboardEntry[] | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
@@ -86,16 +131,22 @@ export function ScoreScreen({
       if (cancelled) return;
       setSaveFailed(!saved.ok);
 
-      const rows = await fetchLeaderboard(college.id);
+      // Both at once: the five to show, and where this student actually sits.
+      // Their rank cannot be read off a five-row list when they are 24th.
+      const [rows, own] = await Promise.all([
+        fetchLeaderboard(college.id, TOP),
+        fetchOwnPlace(college.id, playerId),
+      ]);
       if (cancelled) return;
       setBoard(rows);
+      setPlace(own);
       setLoading(false);
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [college.id, pendingSave]);
+  }, [college.id, playerId, pendingSave]);
 
   return (
     <div className="screen score-screen">
@@ -122,33 +173,37 @@ export function ScoreScreen({
       ) : board.length === 0 ? (
         <p className="board-empty">No scores on this college’s board yet.</p>
       ) : (
-        <table className="board">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Name</th>
-              <th scope="col">Score</th>
-              <th scope="col">Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            {board.map((entry) => (
-              <tr key={entry.playerId} className={entry.playerId === playerId ? 'is-me' : ''}>
-                <td>{entry.rank}</td>
-                <td>
-                  {entry.displayName}
-                  {entry.playerId === playerId && (
-                    <span className="you-tag">Your best</span>
-                  )}
-                </td>
-                <td>
-                  {entry.solved}/{entry.total}
-                </td>
-                <td>{formatDuration(entry.totalSeconds)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <>
+          <Leaderboard
+            entries={withOwnRow(board, place, TOP)}
+            playerId={playerId}
+            gapBefore={gapAfterRank(board, place, TOP)}
+          />
+
+          <button
+            className="board-more"
+            type="button"
+            onClick={() => {
+              setShowFull(true);
+              if (fullBoard === null) {
+                void fetchLeaderboard(college.id, 1000).then(setFullBoard);
+              }
+            }}
+          >
+            See Leaderboard
+            {place ? ` (${place.boardSize} playing)` : ''}
+          </button>
+        </>
+      )}
+
+      {showFull && (
+        <LeaderboardModal
+          entries={fullBoard ?? []}
+          playerId={playerId}
+          collegeName={college.name}
+          loading={fullBoard === null}
+          onClose={() => setShowFull(false)}
+        />
       )}
 
       {preview && (

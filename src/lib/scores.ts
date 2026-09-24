@@ -95,6 +95,48 @@ export async function saveRound(args: {
  * Best round per player for a college, most solved first then fastest.
  * Server-side this returns a first name only — never a full name or phone.
  */
+/** Where one student sits on their college board, counted over the whole of it. */
+export type BoardPlace = {
+  entry: LeaderboardEntry;
+  /** How many students have a place on this board. */
+  boardSize: number;
+};
+
+/**
+ * Asked separately from the list, not found by searching it. Searching only
+ * works while the student is inside the window fetched, and a student outside
+ * it is precisely who this is for.
+ */
+export async function fetchOwnPlace(
+  collegeId: string,
+  playerId: string,
+): Promise<BoardPlace | null> {
+  if (!supabase) {
+    const board = await fetchLeaderboard(collegeId, 1000);
+    const entry = board.find((e) => e.playerId === playerId);
+    return entry ? { entry, boardSize: board.length } : null;
+  }
+
+  const { data, error } = await supabase.rpc('college_rank', {
+    p_college_id: collegeId,
+    p_player_id: playerId,
+  });
+
+  if (error || !data || data.length === 0) return null;
+  const row = data[0]!;
+  return {
+    entry: {
+      rank: Number(row.rank),
+      playerId: row.player_id,
+      displayName: row.display_name,
+      solved: row.solved,
+      total: row.total,
+      totalSeconds: row.total_seconds,
+    },
+    boardSize: Number(row.board_size),
+  };
+}
+
 export async function fetchLeaderboard(
   collegeId: string,
   limit = 10,

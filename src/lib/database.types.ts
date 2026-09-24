@@ -168,6 +168,18 @@ export type Database = {
           total_seconds: number;
         }[];
       };
+      college_rank: {
+        Args: { p_college_id: string; p_player_id: string };
+        Returns: {
+          rank: number;
+          player_id: string;
+          display_name: string;
+          solved: number;
+          total: number;
+          total_seconds: number;
+          board_size: number;
+        }[];
+      };
       save_round: {
         Args: {
           p_player_id: string;

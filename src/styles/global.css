@@ -1539,3 +1539,113 @@ code {
 .debrief-cta {
   margin-top: 36px;
 }
+
+/* --- Leaderboard: the gap, the button, the popup -------------------------
+   The five shown on the page are not the board, they are the top of it. The
+   student's own row is appended below with a marker between, so 5th to 24th
+   reads as a jump rather than as rows having gone missing.
+   ------------------------------------------------------------------------ */
+.board-gap td {
+  padding: 2px 0 6px;
+  text-align: center;
+  font-size: 15px;
+  letter-spacing: 0.3em;
+  color: rgba(159, 176, 217, 0.45);
+}
+
+.board-more {
+  margin-top: 14px;
+  padding: 11px 14px;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* --- The popup ------------------------------------------------------------
+   Fixed to the viewport rather than the phone frame, so on a desktop it
+   covers the whole window and cannot be scrolled away from.
+   ------------------------------------------------------------------------ */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(2, 4, 16, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.modal-panel {
+  width: 100%;
+  max-width: 430px;
+  /* Not a fixed height: a board of three should not open a tall empty box. */
+  max-height: min(78dvh, 640px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: #0a0e2a;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+  outline: none;
+}
+
+.modal-head {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.modal-sub {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.modal-close {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+}
+
+.modal-close svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 18px 18px;
+}
