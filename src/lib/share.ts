@@ -1,5 +1,6 @@
 import { generateScorecard, type ScorecardInput } from './scorecard';
 import { CHALLENGE_NAME } from '../flow/branding';
+import { linkWithRef } from './referral';
 // The card says "0m 57s" because its layout expects a fixed width. A sentence
 // does not, so the caption rounds to the nearest minute.
 import { formatApproxDuration } from '../flow/puzzle';
@@ -31,7 +32,7 @@ export function gameLink(): string {
  * on a dare rather than an invitation because that is what gets forwarded in
  * a batch group.
  */
-export function buildShareCaption(input: ScorecardInput): string {
+export function buildShareCaption(input: ScorecardInput, ref?: string | null): string {
   return [
     `Hey, I just played Spot the Diagnosis by DBMCI One and scored ` +
       `${input.solved}/${input.total} correct in ` +
@@ -40,7 +41,10 @@ export function buildShareCaption(input: ScorecardInput): string {
     '',
     // The blank line matters: WhatsApp only renders a preview card for a URL
     // that stands on its own, and a link buried mid-sentence gets skimmed.
-    gameLink(),
+    //
+    // The ref is this round's own code, so a friend who plays is counted
+    // against the person who sent it.
+    linkWithRef(gameLink(), ref ?? null),
   ].join('\n');
 }
 
@@ -57,7 +61,10 @@ export function buildShareCaption(input: ScorecardInput): string {
  * The previous copy-to-clipboard workaround was removed deliberately; the
  * paste step cost more than the occasional lost caption.
  */
-export async function shareScorecard(input: ScorecardInput): Promise<ShareOutcome> {
+export async function shareScorecard(
+  input: ScorecardInput,
+  ref?: string | null,
+): Promise<ShareOutcome> {
   const card = await generateScorecard(input);
   if (!card) return { kind: 'failed' };
 
@@ -69,7 +76,7 @@ export async function shareScorecard(input: ScorecardInput): Promise<ShareOutcom
   });
   const payload = {
     files: [file],
-    text: buildShareCaption(input),
+    text: buildShareCaption(input, ref),
     title: CHALLENGE_NAME,
   };
 

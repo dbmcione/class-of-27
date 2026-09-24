@@ -96,6 +96,11 @@ export function ScoreScreen({
   const [showFull, setShowFull] = useState(false);
   const [fullBoard, setFullBoard] = useState<LeaderboardEntry[] | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
+  /**
+   * This round's code, which the share link carries as its ref so a friend
+   * who plays is credited to this student.
+   */
+  const [shareCode, setShareCode] = useState<string | null>(null);
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
   /**
@@ -178,6 +183,7 @@ export function ScoreScreen({
     void (async () => {
       const saved = pendingSave ? await pendingSave : null;
       if (!saved?.code) return;
+      setShareCode(saved.code);
       const card = await cardRef.current;
       if (card) await uploadScorecard(saved.code, card.blob);
     })();
@@ -256,7 +262,7 @@ export function ScoreScreen({
             setSharing(true);
             setShareNote(null);
             try {
-              const outcome = await shareScorecard(scorecard);
+              const outcome = await shareScorecard(scorecard, shareCode);
               setShareNote(shareHint(outcome) || null);
             } finally {
               sharingRef.current = false;

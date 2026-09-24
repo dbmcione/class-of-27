@@ -3,6 +3,7 @@ import { RevealCard } from '../components/RevealCard';
 import { PUZZLE_BANK, type Puzzle } from '../flow/bank';
 import { formatDuration } from '../flow/puzzle';
 import { fetchPlay, type Play } from '../lib/play';
+import { linkWithRef } from '../lib/referral';
 
 type Props = { code: string };
 
@@ -49,7 +50,7 @@ export function PlayAnswersScreen({ code }: Props) {
           This link doesn’t match a round. It may have been typed slightly
           wrong, or the round may have been cleared.
         </p>
-        <a className="btn" href={homeHref()}>
+        <a className="btn" href={homeHref(code)}>
           Play The Game
         </a>
       </div>
@@ -83,7 +84,7 @@ export function PlayAnswersScreen({ code }: Props) {
         ))}
       </ol>
 
-      <a className="btn" href={homeHref()}>
+      <a className="btn" href={homeHref(code)}>
         Play The Game
       </a>
     </div>
@@ -94,8 +95,14 @@ function byId(id: string): Puzzle | undefined {
   return PUZZLE_BANK.find((p) => p.id === id);
 }
 
-/** Back to the game from /a/<code>, wherever the app is mounted. */
-function homeHref(): string {
+/**
+ * Back to the game from /a/<code>, wherever the app is mounted.
+ *
+ * Carrying the ref, because a forwarded answers page is a referral just as
+ * much as a forwarded scorecard is. The code in this page's own address is
+ * the round that was shared, so it is the right one to credit.
+ */
+function homeHref(code: string): string {
   const base = window.location.pathname.replace(/\/a\/[^/]*\/?$/, '');
-  return base === '' ? '/' : base;
+  return linkWithRef(base === '' ? '/' : base, code);
 }

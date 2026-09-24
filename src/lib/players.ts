@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { normalisePhone } from './phone';
+import { currentRef } from './referral';
 import type { Session } from '../flow/session';
 import type { StudyStage } from '../flow/questions';
 
@@ -19,6 +20,10 @@ export async function registerPlayer(
   phone: string,
 ): Promise<RegisterResult> {
   const cleanPhone = normalisePhone(phone);
+  // Whoever's link brought them here, if anyone's. Read at this moment rather
+  // than passed down through four screens, because it is a property of the
+  // visit, not of anything the intake form collected.
+  const ref = currentRef();
 
   if (!supabase) {
     const playerId = `${collegeId}:${cleanPhone}`;
@@ -36,6 +41,7 @@ export async function registerPlayer(
   const { data, error } = await supabase.rpc('register_player', {
     p_college_id: collegeId,
     p_phone: cleanPhone,
+    p_ref: ref,
   });
 
   if (error || !data) {
