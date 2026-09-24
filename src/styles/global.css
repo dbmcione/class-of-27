@@ -168,20 +168,17 @@ body {
   margin-top: 15px;
 }
 
-/* The challenge name is 32 characters, which does not fit on one line at 26px
-   on any phone. Rather than pick a size small enough for the narrowest screen
-   and waste the room on every other one, it scales with the viewport: the
-   calc is the largest size that still fits, measured across 320 to 430px.
-   The 25px ceiling is for desktop, where the frame is a fixed 430px wide and
-   vw describes the window instead. Only this title: the other h1s are short
-   and have no reason to shrink. */
 .challenge-title,
 .challenge-title + .sub {
   text-align: center;
 }
 
+/* The title used to scale with the screen, because the name it carried ran to
+   32 characters and would not fit on one line at 26px on any phone. It is 18
+   characters now and fits everywhere down to 320px, so the fluid sizing has
+   nothing left to solve and this matches the headings on every other screen. */
 .challenge-title {
-  font-size: clamp(16px, calc(6.5vw - 3px), 25px);
+  font-size: 26px;
 }
 
 h1 {
