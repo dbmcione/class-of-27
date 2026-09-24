@@ -35,23 +35,31 @@ function readStored(): string | null {
 }
 
 /**
- * Reads the ref out of the address, remembers it, and takes it back out of
- * the address bar.
+ * Reads the ref out of the address and remembers it for the rest of the
+ * visit.
  *
- * The removal is the part worth explaining. Left in place, a student who
- * copies the URL out of their own browser to send to someone would pass on
- * the friend who referred *them*, and the chain would record a referral that
- * never happened. Stripping it means the only way to hand on a ref is to use
- * the share button, which attaches the right one.
+ * The ref is deliberately LEFT in the address bar. It could be stripped, and
+ * then the only way to hand one on would be the share button, which always
+ * attaches the right code. Leaving it means a student who copies the URL out
+ * of their own browser and sends it to a friend passes on the ref that
+ * brought them here, so that friend is credited to the wrong student.
  *
- * Called once on mount. Safe to call again; it is idempotent.
+ * That is a known and accepted trade, made by the product owner: a share
+ * counted against the wrong person is better than a share counted as if it
+ * had come from marketing. Plenty of students forward a link by copying it
+ * rather than by tapping the button, and every one of those would otherwise
+ * be lost.
+ *
+ * So `referred_by_code` answers "which link did they arrive on", not "who
+ * personally sent it to them". Read the sharer views with that in mind.
+ *
+ * Called once before the first render. Safe to call again; it is idempotent.
  */
 export function captureRef(): string | null {
   let found: string | null = null;
 
   try {
-    const url = new URL(window.location.href);
-    const raw = url.searchParams.get(PARAM);
+    const raw = new URL(window.location.href).searchParams.get(PARAM);
 
     if (raw && CODE.test(raw)) {
       found = raw;
@@ -60,13 +68,6 @@ export function captureRef(): string | null {
       } catch {
         // Private browsing. The ref still works for this page load.
       }
-    }
-
-    if (url.searchParams.has(PARAM)) {
-      url.searchParams.delete(PARAM);
-      // replaceState, not assign: no reload, and no extra history entry for
-      // the back button to land on.
-      window.history.replaceState({}, '', url.pathname + url.search + url.hash);
     }
   } catch {
     // A URL the browser will not parse is not worth failing a page load over.

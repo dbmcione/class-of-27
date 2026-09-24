@@ -123,6 +123,12 @@ grant select on public.referral_summary to service_role;
 -- Counts the students a sharer's links produced, resolved from the round back
 -- to the person who played it. A student who shared several rounds is counted
 -- once, with all of their referrals added up.
+--
+-- Read this as "whose link they arrived on", not "who personally sent it to
+-- them". The ref stays in the address bar by design, so a student who copies
+-- the URL out of their browser and passes it on hands over the ref that
+-- brought them there, and the new arrival is credited to the original sharer.
+-- Accepted deliberately: the alternative loses those arrivals entirely.
 -- ---------------------------------------------------------------------------
 create or replace view public.top_sharers as
 select
