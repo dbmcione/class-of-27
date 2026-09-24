@@ -237,15 +237,15 @@ export function ScoreScreen({
         </p>
 
         <section className="score-note">
-          <p>That was a fun game. A direct clue leading to a diagnosis.</p>
           <p>
-            NEET PG questions have evolved beyond that to test your clinical
-            reasoning.
+            That was a fun game, a direct clue leading to a diagnosis. But,
+            NEET PG questions have now evolved beyond that to test your
+            clinical reasoning.
           </p>
         </section>
 
         <button className="btn" type="button" onClick={onSeeAnswers}>
-          View MCQs
+          View Sample MCQs
         </button>
       </div>
     </div>

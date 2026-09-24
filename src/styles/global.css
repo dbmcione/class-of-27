@@ -1578,35 +1578,42 @@ code {
   padding: 4px 18px 18px;
 }
 
-/* --- The note under the board --------------------------------------------
-   What the game was really about, read after the score and the rank rather
-   than before them: the student came here for the number, and a point made
-   over the top of it is a point not read.
+/* --- The note above the answers button -----------------------------------
+   A panel rather than loose text. Between two full-width buttons, unstyled
+   copy reads as something that fell out of the layout.
 
-   Deliberately quiet. It sits between the leaderboard and the two buttons on
-   an already busy page, so it is set at body weight with a hairline above it
-   rather than boxed or coloured.
+   The aurora gradient along the top edge is the app's one recurring accent:
+   the same three stops as the score, the keyboard's correct keys and the
+   scorecard's panel. It earns the space without adding another colour.
    ------------------------------------------------------------------------ */
 .score-note {
-  margin: 4px 0 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
+  position: relative;
+  margin: 6px 0 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.045);
+  overflow: hidden;
 }
 
-/* The wrapper spaces consecutive buttons, and this sits between two of them,
-   so that rule has to stop applying across it. */
-.screen-actions .score-note + .btn {
-  margin-top: 0;
+.score-note::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--aurora-teal),
+    var(--aurora-cyan),
+    var(--aurora-purple)
+  );
 }
 
 .score-note p {
   margin: 0;
   font-size: 13.5px;
-  line-height: 1.6;
-  color: var(--muted);
-}
-
-.score-note p + p {
-  margin-top: 10px;
-  color: rgba(226, 232, 250, 0.82);
+  line-height: 1.65;
+  color: rgba(226, 232, 250, 0.86);
 }
