@@ -28,6 +28,18 @@ var CODE_COLUMN = 'answers_code';
 var LINK_COLUMN = 'answers_url';
 
 /**
+ * The automation's own column. Every new row starts Pending and Make writes
+ * Success or Failure over it once it has sent. Added here and not in the
+ * database, because it records what Make did, which the database has no way
+ * of knowing.
+ *
+ * Nothing here ever writes it again. A row is only appended once, so a value
+ * Make has set cannot be reset to Pending by a later run.
+ */
+var RESULT_COLUMN = 'result';
+var RESULT_PENDING = 'Pending';
+
+/**
  * Sorting is not cosmetic here. PostgREST pages with limit and offset, and
  * without an order the database may hand back the same row twice across two
  * pages and drop another. Phone is unique, so it orders the pages stably.
@@ -61,7 +73,7 @@ function refreshLeads() {
 
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
   var headers = Object.keys(rows[0]);
-  writeHeadersIfMissing_(sheet, headers);
+  ensureHeaders_(sheet, headers);
 
   var known = existingPhones_(sheet);
   var fresh = rows.filter(function (row) {
@@ -96,16 +108,39 @@ function withAnswersLink_(row, gameUrl) {
     }
     out[LINK_COLUMN] = row[k] && gameUrl ? gameUrl + '/a/' + row[k] : '';
   });
+  out[RESULT_COLUMN] = RESULT_PENDING;
   return out;
 }
 
-function writeHeadersIfMissing_(sheet, headers) {
-  if (sheet.getLastRow() > 0) return;
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold');
-  sheet.setFrozenRows(1);
-  // A phone number is an identifier, not a quantity. Left as a number, Sheets
-  // would be free to render it as 9.87654E+09 and hand that to the automation.
-  sheet.getRange(2, 1, sheet.getMaxRows() - 1, 1).setNumberFormat('@');
+/**
+ * Writes the header on an empty sheet, and extends it when a column has been
+ * added since. Without the second part a sheet that already had rows would
+ * keep its old header while new rows arrived a column wider, and the
+ * automation, which finds its column by name, would quietly stop working.
+ *
+ * Only ever touches row 1. Existing rows keep whatever they had.
+ */
+function ensureHeaders_(sheet, headers) {
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold');
+    sheet.setFrozenRows(1);
+    // A phone number is an identifier, not a quantity. Left as a number,
+    // Sheets would be free to render it as 9.87654E+09 and hand that to the
+    // automation.
+    sheet.getRange(2, 1, sheet.getMaxRows() - 1, 1).setNumberFormat('@');
+    return;
+  }
+
+  var existing = sheet.getRange(1, 1, 1, Math.max(1, sheet.getLastColumn())).getValues()[0];
+  var missing = [];
+  for (var i = existing.length; i < headers.length; i++) missing.push(headers[i]);
+  if (missing.length === 0) return;
+
+  sheet
+    .getRange(1, existing.length + 1, 1, missing.length)
+    .setValues([missing])
+    .setFontWeight('bold');
+  Logger.log('Added header(s): ' + missing.join(', '));
 }
 
 /** Phones already in column A, as a lookup. */
