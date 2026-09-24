@@ -1,7 +1,7 @@
 import { useId, useState, type FormEvent } from 'react';
 import { isValidPhone, normalisePhone } from '../lib/phone';
 import { lookupPlayer } from '../lib/players';
-import { CHALLENGE_NAME, CHALLENGE_DESCRIPTION } from '../flow/branding';
+import { CHALLENGE_TITLE, CHALLENGE_DESCRIPTION } from '../flow/branding';
 import type { Session } from '../flow/session';
 
 
@@ -47,7 +47,7 @@ export function LandingScreen({ onReturning, onNew }: Props) {
 
   return (
     <div className="screen">
-      <h1 className="challenge-title">{CHALLENGE_NAME}</h1>
+      <h1 className="challenge-title">{CHALLENGE_TITLE}</h1>
       <p className="sub">{CHALLENGE_DESCRIPTION}</p>
 
       <form className="form landing-form" onSubmit={handleSubmit} noValidate>
