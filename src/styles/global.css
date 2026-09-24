@@ -1546,11 +1546,19 @@ code {
    reads as a jump rather than as rows having gone missing.
    ------------------------------------------------------------------------ */
 .board-gap td {
-  padding: 2px 0 6px;
+  padding: 13px 0 11px;
   text-align: center;
-  font-size: 15px;
-  letter-spacing: 0.3em;
-  color: rgba(159, 176, 217, 0.45);
+  font-size: 17px;
+  letter-spacing: 0.35em;
+  color: rgba(159, 176, 217, 0.9);
+  /* Dashed, so the break reads as rows left out rather than as another row. */
+  border-bottom: 1px dashed rgba(159, 176, 217, 0.38);
+}
+
+/* The solid rule under the fifth row would otherwise sit a few pixels above
+   the dashed one and read as a mistake. The dashed rule is the divider here. */
+.board tbody tr:has(+ .board-gap) td {
+  border-bottom-color: transparent;
 }
 
 .board-more {
