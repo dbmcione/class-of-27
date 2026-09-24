@@ -64,7 +64,7 @@ export async function shareScorecard(input: ScorecardInput): Promise<ShareOutcom
   // Name and MIME must agree with what was actually encoded, or a share
   // target may reject the file as an unrecognised type.
   const extension = card.format === 'image/png' ? 'png' : 'jpg';
-  const file = new File([card.blob], `class-of-27-scorecard.${extension}`, {
+  const file = new File([card.blob], `spot-the-diagnosis-scorecard.${extension}`, {
     type: card.format,
   });
   const payload = {
