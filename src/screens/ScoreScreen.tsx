@@ -205,6 +205,14 @@ export function ScoreScreen({
         />
       )}
 
+      <section className="score-note">
+        <p>That was a game: one direct clue, one diagnosis.</p>
+        <p>
+          NEET PG has moved on. Its questions now integrate subjects, take
+          several steps, and turn on clinical reasoning.
+        </p>
+      </section>
+
       {preview && (
         <img className="scorecard-preview" src={preview} alt="Your scorecard" />
       )}

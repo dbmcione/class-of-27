@@ -1577,3 +1577,30 @@ code {
   overscroll-behavior: contain;
   padding: 4px 18px 18px;
 }
+
+/* --- The note under the board --------------------------------------------
+   What the game was really about, read after the score and the rank rather
+   than before them: the student came here for the number, and a point made
+   over the top of it is a point not read.
+
+   Deliberately quiet. It sits between the leaderboard and the two buttons on
+   an already busy page, so it is set at body weight with a hairline above it
+   rather than boxed or coloured.
+   ------------------------------------------------------------------------ */
+.score-note {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.score-note p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.score-note p + p {
+  margin-top: 10px;
+  color: rgba(226, 232, 250, 0.82);
+}
