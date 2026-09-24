@@ -1,6 +1,6 @@
 import { useId, useLayoutEffect, useRef } from 'react';
 import type { Puzzle } from '../flow/bank';
-import { teaser, titleCaseAnswer } from '../flow/puzzle';
+import { titleCaseAnswer } from '../flow/puzzle';
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -85,7 +85,7 @@ export function RevealCard({
 
         {!open && (
           <span className="reveal-teaser">
-            {teaser(puzzle.definition)}
+            {puzzle.definition}
             <span className="reveal-fade" aria-hidden="true" />
           </span>
         )}

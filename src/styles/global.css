@@ -971,8 +971,16 @@ code {
 }
 
 /* Cut mid-word, faded out — the card should read as unfinished. */
+/* Clamped to two lines rather than to a character count. Counting characters
+   was the old way and it is why cards did not match: 105 characters of one
+   definition wraps onto two lines and of another onto three, depending on
+   where the spaces fall. Lines are what the eye is comparing. */
 .reveal-teaser {
-  display: block;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
   position: relative;
   font-size: 13px;
   line-height: 1.6;

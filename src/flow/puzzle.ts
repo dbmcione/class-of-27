@@ -124,21 +124,3 @@ export function formatDuration(totalSeconds: number): string {
   return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
 }
 
-/**
- * Cuts text short deliberately mid-word, so the card reads as unfinished and
- * invites a tap. A clean break at a space or full stop reads as complete and
- * gives nobody a reason to open it.
- */
-export function teaser(text: string, approxLength = 105): string {
-  if (text.length <= approxLength) return text;
-
-  let cut = approxLength;
-  // Nudge forward until the cut lands inside a word rather than on a space.
-  while (
-    cut < text.length &&
-    (text[cut] === ' ' || text[cut - 1] === ' ' || !/[a-zA-Z]/.test(text[cut] ?? ''))
-  ) {
-    cut += 1;
-  }
-  return text.slice(0, cut);
-}
