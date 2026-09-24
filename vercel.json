@@ -1,5 +1,11 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "//": "Every path is the app, so /a/<code> works without a router. Assets are excluded: a missing one should 404 rather than come back as index.html, which a browser would then try to run as JavaScript and fail silently on.",
+      "source": "/((?!assets/).*)",
+      "destination": "/index.html"
+    }
+  ]
 }
