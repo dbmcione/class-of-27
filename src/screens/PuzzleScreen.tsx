@@ -151,7 +151,7 @@ export function PuzzleScreen({ puzzles, onFinish }: Props) {
             It’s <strong>{titleCaseAnswer(puzzle.answer)}</strong>.
           </p>
           <button className="btn" type="button" onClick={advance}>
-            {isLast ? 'See The Answers' : 'Next Question'}
+            {isLast ? 'See My Score' : 'Next Question'}
           </button>
         </div>
       ) : (
