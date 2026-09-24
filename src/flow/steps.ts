@@ -7,16 +7,12 @@
  *     (was puzzle + the separate round-result screen)
  *   - score comes before the answers, so the result lands first and the
  *     explanations are what the student leaves on
- *   - debrief sits between the last question and the score: the point about
- *     how the real paper is asked lands while the round is still fresh, and
- *     it is the one moment the student is certain to still be reading
  */
 export const STEPS = [
   'landing',
   'intake',
   'transition',
   'puzzle',
-  'debrief',
   'score',
   'reveal',
 ] as const;

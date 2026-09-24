@@ -4,7 +4,6 @@ import { LandingScreen } from './screens/LandingScreen';
 import { IntakeScreen } from './screens/IntakeScreen';
 import { TransitionScreen } from './screens/TransitionScreen';
 import { PuzzleScreen } from './screens/PuzzleScreen';
-import { DebriefScreen } from './screens/DebriefScreen';
 import { ScoreScreen } from './screens/ScoreScreen';
 import { RevealScreen } from './screens/RevealScreen';
 import { PlayAnswersScreen } from './screens/PlayAnswersScreen';
@@ -139,8 +138,6 @@ export function App() {
           }}
         />
       )}
-
-      {step === 'debrief' && <DebriefScreen onContinue={advance} />}
 
       {step === 'score' && session && (
         <ScoreScreen
