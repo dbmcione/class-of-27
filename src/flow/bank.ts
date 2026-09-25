@@ -375,11 +375,11 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
     image: {
       src: osteoidOsteomaCtUrl,
       width: 316,
-      height: 320,
+      height: 712,
       alt:
-        'CT reconstruction of the tibial shaft showing a small lucent nidus ' +
-        'within the cortex, surrounded by dense fusiform sclerotic thickening ' +
-        'of the surrounding bone.',
+        'Longitudinal CT reconstruction of the tibial shaft showing a small ' +
+        'lucent nidus within the cortex, surrounded by dense fusiform sclerotic ' +
+        'thickening of the surrounding bone.',
     },
     mcq: {
       stem:
