@@ -48,7 +48,11 @@ export function isPositionShown(
   guessed: ReadonlySet<string>,
 ): boolean {
   const char = puzzle.answer[index];
-  if (char === undefined || !isLetter(char)) return false;
+  if (char === undefined) return false;
+  // A non-letter (e.g. the "12" in "VITAMIN B12 DEFICIENCY") isn't on the
+  // keyboard and can never be guessed, so it shows from the start rather
+  // than sitting in as a blank no correct guess can ever fill.
+  if (!isLetter(char)) return true;
   return revealedIndices(puzzle.answer).includes(index) || guessed.has(char);
 }
 
@@ -75,14 +79,20 @@ export function preRevealedLetters(puzzle: Puzzle): Set<string> {
  * Small words stay lowercase inside the term — it is "Tetralogy of Fallot",
  * never "Tetralogy Of Fallot", and getting a medical eponym's casing wrong
  * looks careless to the students being taught it.
+ *
+ * Only mid-term, never trailing: a term never grammatically ends on one of
+ * these words, so a trailing single letter is a subtype label, not the
+ * article — "Hemophilia A" keeps its capital, not "Hemophilia a".
  */
 const LOWERCASE_IN_TERM = new Set(['OF', 'THE', 'AND', 'IN', 'A']);
 
 export function titleCaseAnswer(answer: string): string {
-  return answer
-    .split(' ')
+  const words = answer.split(' ');
+  return words
     .map((word, i) => {
-      if (i > 0 && LOWERCASE_IN_TERM.has(word)) return word.toLowerCase();
+      if (i > 0 && i < words.length - 1 && LOWERCASE_IN_TERM.has(word)) {
+        return word.toLowerCase();
+      }
       return word.charAt(0) + word.slice(1).toLowerCase();
     })
     .join(' ');

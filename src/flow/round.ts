@@ -28,15 +28,18 @@ export type RoundSelection = {
   cycled: boolean;
 };
 
+/** Every student's first round must include this puzzle, at a random position. */
+const PINNED_FIRST_ROUND_ID = 'primary-hyperaldosteronism';
+
 /**
  * Picks the next set of puzzles, skipping anything this player has already
  * been shown. When fewer than a full round remain, the pool starts over —
  * otherwise a returning student would hit a dead end after five attempts.
  *
- * With the bank at exactly one round, that second clause is the only one that
- * ever runs: a replay serves the same five in the same order, which is the
- * intended behaviour until the bank grows. Nothing here needs changing when
- * it does; the exclusion starts working again on its own.
+ * A student's first round (an empty seen list) is a special case: it always
+ * carries `PINNED_FIRST_ROUND_ID`, shuffled in at a random position alongside
+ * four other random puzzles, so every student sees it early regardless of
+ * what the rest of the shuffle turns up.
  */
 export function selectRound(
   seen: readonly string[],
@@ -48,6 +51,18 @@ export function selectRound(
   // served in the sheet's order rather than shuffled into a different one.
   if (bank.length <= count) {
     return { puzzles: [...bank], nextSeen: bank.map((p) => p.id), cycled: true };
+  }
+
+  if (seen.length === 0) {
+    const pinned = bank.find((p) => p.id === PINNED_FIRST_ROUND_ID);
+    if (pinned) {
+      const others = shuffle(
+        bank.filter((p) => p.id !== PINNED_FIRST_ROUND_ID),
+        rng,
+      ).slice(0, count - 1);
+      const puzzles = shuffle([pinned, ...others], rng);
+      return { puzzles, nextSeen: puzzles.map((p) => p.id), cycled: false };
+    }
   }
 
   const seenSet = new Set(seen);
