@@ -21,6 +21,13 @@ type Props = {
    * searching; a six-item list is faster to just look at.
    */
   searchable?: boolean;
+  /**
+   * Characters required before the list drops down. For a searchable list
+   * long enough to need this, showing everything on focus is just noise —
+   * better to wait until typing has actually narrowed it down. Ignored when
+   * not searchable, since a short list opens on click with nothing to type.
+   */
+  minChars?: number;
 };
 
 /**
@@ -36,6 +43,7 @@ export function SelectField({
   loading = false,
   loadingLabel = 'Loading…',
   searchable,
+  minChars = 0,
 }: Props) {
   const inputId = useId();
   const listId = `${inputId}-list`;
@@ -51,14 +59,21 @@ export function SelectField({
 
   const selected = options.find((o) => o.id === value) ?? null;
 
+  const trimmedQuery = query.trim();
+  const belowMinChars = canSearch && minChars > 0 && trimmedQuery.length < minChars;
+  // The field can be focused (`open`) well before there's anything worth
+  // showing — this is what actually gates the dropdown appearing.
+  const showList = open && !belowMinChars;
+
   const allMatches = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    if (belowMinChars) return [];
+    const q = trimmedQuery.toLowerCase();
     if (!canSearch || q === '') return options;
     return options.filter(
       (o) =>
         o.label.toLowerCase().includes(q) || (o.meta ?? '').toLowerCase().includes(q),
     );
-  }, [options, query, canSearch]);
+  }, [options, trimmedQuery, canSearch, belowMinChars]);
 
   /**
    * The college list runs to well over a thousand entries. Rendering them all
@@ -78,9 +93,9 @@ export function SelectField({
   }, [open]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!showList) return;
     listRef.current?.children[activeIndex]?.scrollIntoView({ block: 'nearest' });
-  }, [activeIndex, open]);
+  }, [activeIndex, showList]);
 
   function openList() {
     if (loading) return;
@@ -141,11 +156,11 @@ export function SelectField({
             role="combobox"
             autoComplete="off"
             readOnly={!canSearch}
-            aria-expanded={open}
+            aria-expanded={showList}
             aria-controls={listId}
             aria-autocomplete={canSearch ? 'list' : 'none'}
             aria-activedescendant={
-              open && matches[activeIndex] ? `${listId}-${activeIndex}` : undefined
+              showList && matches[activeIndex] ? `${listId}-${activeIndex}` : undefined
             }
             data-filled={selected !== null && query === ''}
             placeholder={shownPlaceholder}
@@ -173,7 +188,7 @@ export function SelectField({
         </div>
       </div>
 
-      {open && (
+      {showList && (
         <ul className="combo-list" id={listId} role="listbox" ref={listRef}>
           {matches.length === 0 && (
             <li className="combo-empty">No match for “{query.trim()}”.</li>

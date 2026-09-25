@@ -117,9 +117,10 @@ export function IntakeScreen({ phone, onDone }: Props) {
             loading={loadingColleges}
             loadingLabel="Loading colleges…"
             placeholder={
-              collegesFailed ? 'Couldn’t load colleges' : 'Search your college…'
+              collegesFailed ? 'Couldn’t load colleges' : 'Type the college name or city'
             }
             searchable
+            minChars={3}
             onChange={setCollegeId}
           />
           {collegesFailed && (
