@@ -217,7 +217,23 @@ export function SelectField({
       </div>
 
       {showList && (
-        <ul className="combo-list" id={listId} role="listbox" ref={listRef}>
+        <ul
+          className="combo-list"
+          id={listId}
+          role="listbox"
+          ref={listRef}
+          // Scrolling the list dismisses the on-screen keyboard on its own —
+          // it's how a student sees more than the two rows left once the
+          // keyboard is up. Left to the browser, that dismissal and the tap
+          // that follows it race each other on iOS: a tap landing while the
+          // keyboard is still mid-dismiss gets spent finishing that instead
+          // of registering as a pick, so the same option needs a second tap.
+          // Blurring here, the instant scrolling starts, finishes the
+          // dismissal ourselves well before any such tap can land.
+          onScroll={() => {
+            if (document.activeElement === inputRef.current) inputRef.current?.blur();
+          }}
+        >
           {matches.length === 0 && (
             <li className="combo-empty">No match for “{query.trim()}”.</li>
           )}
