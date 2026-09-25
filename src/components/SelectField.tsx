@@ -56,6 +56,10 @@ export function SelectField({
   const wrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  /** Where a press on an option started, so pointerup can tell a tap from a
+   *  scroll by how far it travelled — see the comment on the option's
+   *  onPointerUp below. */
+  const pressStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const selected = options.find((o) => o.id === value) ?? null;
 
@@ -225,16 +229,36 @@ export function SelectField({
               aria-selected={option.id === value}
               className={`combo-option${index === activeIndex ? ' is-active' : ''}`}
               onPointerEnter={() => setActiveIndex(index)}
-              // `onMouseDown`, not `onPointerDown`: a touch fires pointerdown
-              // the instant a finger lands, before the browser knows whether
-              // it's a tap or the start of a scroll — preventDefault there
-              // cancels the scroll gesture outright, which is why this list
-              // couldn't be scrolled by touch at all. A synthetic mousedown
-              // only fires once a touch resolves as a tap, so scrolling is
-              // untouched and a genuine tap still commits immediately.
-              onMouseDown={(e) => {
-                e.preventDefault();
-                commit(option);
+              // No preventDefault here: that's what originally blocked touch
+              // scrolling outright, since it cancels the browser's gesture
+              // recognition before it can tell a tap from the start of a
+              // scroll. Position is only recorded, so onPointerUp below can
+              // measure how far the pointer actually travelled.
+              onPointerDown={(e) => {
+                pressStartRef.current = { x: e.clientX, y: e.clientY };
+              }}
+              // Keeps the input focused through the tap — without this, the
+              // browser's default mousedown behaviour blurs it first, which
+              // would close the list (and lose the pick) before it lands.
+              // Safe for touch scrolling: by the time a scroll is already
+              // underway, this preventDefault is too late to stop it.
+              onMouseDown={(e) => e.preventDefault()}
+              // Committing here rather than on mousedown/click sidesteps a
+              // second, unrelated mobile bug: Safari withholds the synthetic
+              // mousedown/click on a non-native-clickable element like this
+              // <li> until a *second* tap, spending the first one only on
+              // :hover — which, combined with the fix above, meant every
+              // option needed two taps to select. Real pointerup fires on
+              // every tap immediately, no such delay, on every browser.
+              onPointerUp={(e) => {
+                const start = pressStartRef.current;
+                pressStartRef.current = null;
+                if (!start) return;
+                // A tap barely moves; a scroll does. Below this threshold it
+                // reads as a pick, same row a drag would instead scroll past.
+                const moved =
+                  Math.abs(e.clientX - start.x) + Math.abs(e.clientY - start.y);
+                if (moved < 10) commit(option);
               }}
             >
               <span className="combo-option-text">
