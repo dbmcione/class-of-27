@@ -374,8 +374,8 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
     ],
     image: {
       src: osteoidOsteomaCtUrl,
-      width: 316,
-      height: 712,
+      width: 309,
+      height: 448,
       alt:
         'Longitudinal CT reconstruction of the tibial shaft showing a small ' +
         'lucent nidus within the cortex, surrounded by dense fusiform sclerotic ' +
