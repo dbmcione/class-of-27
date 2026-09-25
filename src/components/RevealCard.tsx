@@ -101,7 +101,7 @@ export function RevealCard({
           <Prose text={puzzle.definition} />
 
           <div className="reveal-section">
-            <p className="reveal-label">Recent NEET PG PYQ</p>
+            <p className="reveal-label">Sample NEET PG question</p>
             <p className="mcq-stem">{puzzle.mcq.stem}</p>
             {puzzle.image && (
               <img
