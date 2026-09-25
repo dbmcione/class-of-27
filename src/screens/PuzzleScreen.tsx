@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Keyboard, type KeyState } from '../components/Keyboard';
 import { WordDisplay } from '../components/WordDisplay';
 import { MAX_WRONG, type Puzzle } from '../flow/bank';
-import type { PuzzleResult } from '../flow/round';
+import type { PuzzleProgress, PuzzleResult } from '../flow/round';
 import {
   answerContains,
   formatClock,
@@ -15,31 +15,60 @@ import {
 type Props = {
   puzzles: readonly Puzzle[];
   onFinish: (results: PuzzleResult[]) => void;
+  /** Where a saved-and-resumed round should pick back up, if any. */
+  resume?: PuzzleProgress | undefined;
+  /** Fired on every change worth persisting, so a reload can resume here. */
+  onProgress?: (progress: PuzzleProgress) => void;
 };
 
-export function PuzzleScreen({ puzzles, onFinish }: Props) {
-  const [index, setIndex] = useState(0);
-  const [results, setResults] = useState<PuzzleResult[]>([]);
-  const [guessed, setGuessed] = useState<ReadonlySet<string>>(new Set());
-  const [wrong, setWrong] = useState<ReadonlySet<string>>(new Set());
-  const [elapsed, setElapsed] = useState(0);
+export function PuzzleScreen({ puzzles, onFinish, resume, onProgress }: Props) {
+  const [index, setIndex] = useState(resume?.index ?? 0);
+  const [results, setResults] = useState<PuzzleResult[]>(resume?.results ?? []);
+  const [guessed, setGuessed] = useState<ReadonlySet<string>>(new Set(resume?.guessed));
+  const [wrong, setWrong] = useState<ReadonlySet<string>>(new Set(resume?.wrong));
+  const [elapsed, setElapsed] = useState(resume?.elapsed ?? 0);
 
   const puzzle = puzzles[index];
   const isLast = index === puzzles.length - 1;
 
   // Seconds spent on the current question, reset as each one starts.
-  const questionStartRef = useRef(0);
+  const questionStartRef = useRef(resume?.elapsed ?? 0);
+  // Read from inside effects/callbacks without making them re-run every tick.
+  const elapsedRef = useRef(resume?.elapsed ?? 0);
+  useEffect(() => {
+    elapsedRef.current = elapsed;
+  }, [elapsed]);
+
+  // Skips the pre-reveal reset below for the question a resumed round was
+  // already on — its guessed/wrong letters came from `resume`, not a fresh
+  // start, and this would otherwise wipe them out on the very first render.
+  const initializedIndexRef = useRef(resume ? resume.index : -1);
 
   // Start each question with its first letters already on show.
   useEffect(() => {
     if (!puzzle) return;
+    if (initializedIndexRef.current === index) return;
+    initializedIndexRef.current = index;
     setGuessed(preRevealedLetters(puzzle));
     setWrong(new Set());
-    questionStartRef.current = elapsed;
-    // elapsed is read as a starting mark only; re-running on every tick would
-    // reset the question.
+    questionStartRef.current = elapsedRef.current;
+    // elapsedRef is read as a starting mark only; re-running on every tick
+    // would reset the question.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, puzzle]);
+
+  // Persist on every change to what a resume needs — not on every clock
+  // tick, since elapsed is read from a ref rather than listed as a dep.
+  useEffect(() => {
+    onProgress?.({
+      index,
+      results,
+      guessed: [...guessed],
+      wrong: [...wrong],
+      elapsed: elapsedRef.current,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, results, guessed, wrong, onProgress]);
 
   const solved = puzzle ? isSolved(puzzle, guessed) : false;
   const lost = wrong.size >= MAX_WRONG;

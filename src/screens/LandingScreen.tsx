@@ -1,6 +1,7 @@
 import { useId, useState, type FormEvent } from 'react';
 import { isValidPhone, normalisePhone } from '../lib/phone';
 import { lookupPlayer } from '../lib/players';
+import { getRememberedPhone, rememberPhone } from '../lib/lastPhone';
 import { CHALLENGE_NAME, CHALLENGE_DESCRIPTION } from '../flow/branding';
 import type { Session } from '../flow/session';
 
@@ -15,7 +16,10 @@ type Props = {
 export function LandingScreen({ onReturning, onNew }: Props) {
   const phoneId = useId();
 
-  const [phone, setPhone] = useState('');
+  // A number that has already started a game once is filled in from the
+  // start: the empty-field, disabled-Start state is for a first-ever visit,
+  // not a returning student.
+  const [phone, setPhone] = useState(() => getRememberedPhone() ?? '');
   const [touched, setTouched] = useState(false);
   const [checking, setChecking] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -31,6 +35,7 @@ export function LandingScreen({ onReturning, onNew }: Props) {
     setChecking(true);
     setFormError(null);
     const clean = normalisePhone(phone);
+    rememberPhone(clean);
     const result = await lookupPlayer(clean);
     setChecking(false);
 

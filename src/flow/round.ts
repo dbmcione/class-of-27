@@ -7,6 +7,21 @@ export type PuzzleResult = {
   wrongGuesses: number;
 };
 
+/**
+ * A round's live progress: which question, guesses so far, running clock.
+ * Shaped for persistence — a plain object of strings and numbers, no Sets —
+ * so a student who loses the tab mid-round resumes exactly where they left
+ * off instead of starting a fresh five.
+ */
+export type PuzzleProgress = {
+  index: number;
+  results: PuzzleResult[];
+  guessed: string[];
+  wrong: string[];
+  /** Total seconds elapsed across the round so far. */
+  elapsed: number;
+};
+
 /** Fisher-Yates. `rng` is injectable so round selection can be tested. */
 function shuffle<T>(items: readonly T[], rng: () => number): T[] {
   const out = [...items];
