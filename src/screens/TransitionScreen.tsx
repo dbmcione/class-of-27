@@ -1,8 +1,14 @@
-import { useRef, useState } from 'react';
-import { shareInvite, inviteShareHint } from '../lib/share';
+import { useEffect, useRef, useState } from 'react';
+import { shareScorecard, shareHint } from '../lib/share';
+import { fetchOwnPlace } from '../lib/scores';
+import { formatMinutesSeconds } from '../flow/puzzle';
+import type { ScorecardInput } from '../lib/scorecard';
+import type { College } from '../lib/colleges';
 
 type Props = {
   name: string | undefined;
+  playerId: string;
+  college: College;
   questionCount: number;
   ready: boolean;
   /** Only for a student who has played before; a first try has nothing to challenge with. */
@@ -30,6 +36,8 @@ function ShareIcon() {
 
 export function TransitionScreen({
   name,
+  playerId,
+  college,
   questionCount,
   ready,
   canChallenge,
@@ -39,6 +47,32 @@ export function TransitionScreen({
   const [shareNote, setShareNote] = useState<string | null>(null);
   // See ScoreScreen for why this needs to be a ref rather than just `sharing`.
   const sharingRef = useRef(false);
+  /**
+   * The student's best round, the one their college board shows, shared the
+   * same way the score page shares a round. Null until loaded, and stays null
+   * for a student who has never finished a round: nothing to challenge with.
+   */
+  const [best, setBest] = useState<ScorecardInput | null>(null);
+
+  useEffect(() => {
+    if (!canChallenge) return;
+    let cancelled = false;
+    void fetchOwnPlace(college.id, playerId).then((place) => {
+      if (cancelled || !place) return;
+      const { solved, total, totalSeconds } = place.entry;
+      setBest({
+        solved,
+        total,
+        totalSeconds,
+        collegeName: college.name,
+        playerName: name || 'Doctor-to-be',
+        timeLabel: formatMinutesSeconds(totalSeconds),
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [canChallenge, college.id, college.name, playerId, name]);
 
   return (
     <div className="screen screen-centred">
@@ -52,7 +86,7 @@ export function TransitionScreen({
       </div>
 
       <div className="transition-actions">
-        {canChallenge && (
+        {canChallenge && best && (
           <>
             <button
               className="btn secondary"
@@ -64,8 +98,8 @@ export function TransitionScreen({
                 setSharing(true);
                 setShareNote(null);
                 try {
-                  const outcome = await shareInvite();
-                  setShareNote(inviteShareHint(outcome) || null);
+                  const outcome = await shareScorecard(best, null);
+                  setShareNote(shareHint(outcome) || null);
                 } finally {
                   sharingRef.current = false;
                   setSharing(false);

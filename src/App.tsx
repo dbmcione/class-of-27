@@ -217,6 +217,8 @@ export function App() {
       {step === 'transition' && session && (
         <TransitionScreen
           name={session.name}
+          playerId={session.playerId}
+          college={session.college}
           questionCount={round.length}
           ready={round.length > 0}
           canChallenge={isReplay}
