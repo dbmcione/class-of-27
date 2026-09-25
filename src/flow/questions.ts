@@ -34,7 +34,7 @@ export const QUESTIONS: readonly Question[] = [
   },
   {
     key: 'postpones_mcqs',
-    statement: 'I keep postponing MCQs until I’ve ‘finished studying’ the subject.',
+    statement: 'I keep postponing MCQs until I’ve finished studying the subject.',
   },
 ];
 

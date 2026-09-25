@@ -137,7 +137,7 @@ export function IntakeScreen({ phone, onDone }: Props) {
                 id={nameId}
                 type="text"
                 autoComplete="given-name"
-                placeholder="e.g. Ayesha Rao"
+                placeholder="Enter your full name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
