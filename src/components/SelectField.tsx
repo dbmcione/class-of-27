@@ -60,7 +60,11 @@ export function SelectField({
   const selected = options.find((o) => o.id === value) ?? null;
 
   const trimmedQuery = query.trim();
-  const belowMinChars = canSearch && minChars > 0 && trimmedQuery.length < minChars;
+  // Reopening a field that already has an answer isn't a fresh search — show
+  // the list straight away regardless of the char minimum, current pick
+  // included, rather than making them retype it before they can change it.
+  const belowMinChars =
+    canSearch && minChars > 0 && selected === null && trimmedQuery.length < minChars;
   // The field can be focused (`open`) well before there's anything worth
   // showing — this is what actually gates the dropdown appearing.
   const showList = open && !belowMinChars;
@@ -68,12 +72,23 @@ export function SelectField({
   const allMatches = useMemo(() => {
     if (belowMinChars) return [];
     const q = trimmedQuery.toLowerCase();
-    if (!canSearch || q === '') return options;
-    return options.filter(
-      (o) =>
-        o.label.toLowerCase().includes(q) || (o.meta ?? '').toLowerCase().includes(q),
-    );
-  }, [options, trimmedQuery, canSearch, belowMinChars]);
+    let result: readonly SelectOption[] =
+      !canSearch || q === ''
+        ? options
+        : options.filter(
+            (o) =>
+              o.label.toLowerCase().includes(q) || (o.meta ?? '').toLowerCase().includes(q),
+          );
+    // The current pick leads the list, so reopening to change it shows what's
+    // chosen before anything else instead of burying it wherever it happens
+    // to fall. Left out of the short, fixed-order pickers (study stage) —
+    // there, drawing the same six rows in the same order every time matters
+    // more than surfacing the current one first.
+    if (canSearch && selected && result.some((o) => o.id === selected.id)) {
+      result = [selected, ...result.filter((o) => o.id !== selected.id)];
+    }
+    return result;
+  }, [options, trimmedQuery, canSearch, belowMinChars, selected]);
 
   /**
    * The college list runs to well over a thousand entries. Rendering them all
@@ -86,10 +101,13 @@ export function SelectField({
   useEffect(() => {
     if (!open) return;
     function onPointerDown(event: PointerEvent) {
-      if (!wrapRef.current?.contains(event.target as Node)) setOpen(false);
+      if (!wrapRef.current?.contains(event.target as Node)) closeList();
     }
     document.addEventListener('pointerdown', onPointerDown);
     return () => document.removeEventListener('pointerdown', onPointerDown);
+    // closeList reads `selected` off the current render's closure, which is
+    // exactly what's wanted: the pick as of when this listener was attached.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   useEffect(() => {
@@ -101,12 +119,20 @@ export function SelectField({
     if (loading) return;
     setOpen(true);
     setQuery('');
-    setActiveIndex(Math.max(0, options.findIndex((o) => o.id === value)));
+    setActiveIndex(0);
+  }
+
+  /** Closes without picking anything — snaps the field back to showing
+   *  whatever is actually selected, rather than leaving stray search text
+   *  (or nothing at all) sitting where the real answer belongs. */
+  function closeList() {
+    setOpen(false);
+    setQuery(selected?.label ?? '');
   }
 
   function commit(option: SelectOption) {
     onChange(option.id);
-    setQuery('');
+    setQuery(option.label);
     setOpen(false);
     inputRef.current?.focus();
   }
@@ -136,12 +162,11 @@ export function SelectField({
     }
     if (event.key === 'Escape' && open) {
       event.preventDefault();
-      setQuery('');
-      setOpen(false);
+      closeList();
     }
   }
 
-  const shownPlaceholder = loading ? loadingLabel : (selected?.label ?? placeholder);
+  const shownPlaceholder = loading ? loadingLabel : placeholder;
 
   return (
     <div className="combo" ref={wrapRef}>
@@ -162,7 +187,6 @@ export function SelectField({
             aria-activedescendant={
               showList && matches[activeIndex] ? `${listId}-${activeIndex}` : undefined
             }
-            data-filled={selected !== null && query === ''}
             placeholder={shownPlaceholder}
             value={query}
             disabled={loading}
@@ -181,7 +205,7 @@ export function SelectField({
             className={`combo-chevron${open ? ' is-open' : ''}`}
             tabIndex={-1}
             aria-label={open ? 'Close list' : 'Open list'}
-            onClick={() => (open ? setOpen(false) : openList())}
+            onClick={() => (open ? closeList() : openList())}
           >
             <ChevronIcon />
           </button>
@@ -213,8 +237,15 @@ export function SelectField({
                 commit(option);
               }}
             >
-              <span className="combo-option-name">{option.label}</span>
-              {option.meta && <span className="combo-option-meta">{option.meta}</span>}
+              <span className="combo-option-text">
+                <span className="combo-option-name">{option.label}</span>
+                {option.meta && <span className="combo-option-meta">{option.meta}</span>}
+              </span>
+              {/* The current pick is marked explicitly rather than left to be
+                  inferred from its position — pinning it first is about
+                  finding it fast, not about doubling as the "you are here"
+                  signal. */}
+              {option.id === value && <CheckIcon />}
             </li>
           ))}
           {hiddenCount > 0 && (
@@ -241,6 +272,14 @@ function ChevronIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg className="combo-option-check" viewBox="0 0 24 24" aria-hidden="true">
+      <polyline points="5 12.5 10 17.5 19 6.5" />
     </svg>
   );
 }
