@@ -5,6 +5,8 @@ type Props = {
   name: string | undefined;
   questionCount: number;
   ready: boolean;
+  /** Only for a student who has played before; a first try has nothing to challenge with. */
+  canChallenge: boolean;
   onStart: () => void;
 };
 
@@ -26,7 +28,13 @@ function ShareIcon() {
   );
 }
 
-export function TransitionScreen({ name, questionCount, ready, onStart }: Props) {
+export function TransitionScreen({
+  name,
+  questionCount,
+  ready,
+  canChallenge,
+  onStart,
+}: Props) {
   const [sharing, setSharing] = useState(false);
   const [shareNote, setShareNote] = useState<string | null>(null);
   // See ScoreScreen for why this needs to be a ref rather than just `sharing`.
@@ -44,31 +52,35 @@ export function TransitionScreen({ name, questionCount, ready, onStart }: Props)
       </div>
 
       <div className="transition-actions">
-        <button
-          className="btn secondary"
-          type="button"
-          disabled={sharing}
-          onClick={async () => {
-            if (sharingRef.current) return;
-            sharingRef.current = true;
-            setSharing(true);
-            setShareNote(null);
-            try {
-              const outcome = await shareInvite();
-              setShareNote(inviteShareHint(outcome) || null);
-            } finally {
-              sharingRef.current = false;
-              setSharing(false);
-            }
-          }}
-        >
-          <ShareIcon />
-          {sharing ? 'Preparing…' : 'Challenge a friend'}
-        </button>
+        {canChallenge && (
+          <>
+            <button
+              className="btn secondary"
+              type="button"
+              disabled={sharing}
+              onClick={async () => {
+                if (sharingRef.current) return;
+                sharingRef.current = true;
+                setSharing(true);
+                setShareNote(null);
+                try {
+                  const outcome = await shareInvite();
+                  setShareNote(inviteShareHint(outcome) || null);
+                } finally {
+                  sharingRef.current = false;
+                  setSharing(false);
+                }
+              }}
+            >
+              <ShareIcon />
+              {sharing ? 'Preparing…' : 'Challenge a friend'}
+            </button>
 
-        <p className="share-note" role="status">
-          {shareNote ?? ''}
-        </p>
+            <p className="share-note" role="status">
+              {shareNote ?? ''}
+            </p>
+          </>
+        )}
 
         <button className="btn" type="button" disabled={!ready} onClick={onStart}>
           {ready ? 'Let’s Go' : 'Getting Your Questions…'}

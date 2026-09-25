@@ -31,6 +31,11 @@ export function App() {
   const [round, setRound] = useState<readonly Puzzle[]>([]);
   /** Where a saved-and-resumed round should pick back up, if any. */
   const [resume, setResume] = useState<PuzzleProgress | undefined>(undefined);
+  /**
+   * Whether this student had been served a round before the current one.
+   * Same test selectRound uses for "first round", so the two agree.
+   */
+  const [isReplay, setIsReplay] = useState(false);
   const [results, setResults] = useState<readonly PuzzleResult[]>([]);
   // Bumped to draw a fresh round when the player goes again.
   const [roundKey, setRoundKey] = useState(0);
@@ -129,6 +134,7 @@ export function App() {
       const selection = selectRound(seen);
       if (cancelled) return;
 
+      setIsReplay(seen.length > 0);
       setRound(selection.puzzles);
       setResume(undefined);
       saveActiveRound(playerId, {
@@ -213,6 +219,7 @@ export function App() {
           name={session.name}
           questionCount={round.length}
           ready={round.length > 0}
+          canChallenge={isReplay}
           onStart={advance}
         />
       )}
