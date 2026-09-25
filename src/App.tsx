@@ -11,6 +11,8 @@ import { playCodeFromUrl } from './lib/play';
 import { saveRound, summarise, type SaveResult } from './lib/scores';
 import { loadSeen, recordServed, resetSeen } from './lib/seen';
 import { loadActiveRound, saveActiveRound, clearActiveRound } from './lib/activeRound';
+import { getRememberedPhone } from './lib/lastPhone';
+import { lookupPlayer } from './lib/players';
 import { selectRound, type PuzzleProgress, type PuzzleResult } from './flow/round';
 import { PUZZLE_BANK, type Puzzle } from './flow/bank';
 import { nextStep, type Step } from './flow/steps';
@@ -38,12 +40,57 @@ export function App() {
    * player's own row has landed and reports "no scores yet".
    */
   const [pendingSave, setPendingSave] = useState<Promise<SaveResult> | null>(null);
+  /**
+   * True from mount whenever this device has already played before — a phone
+   * number is remembered, so there is a lookup to run before we know whether
+   * to show the landing screen at all. A first-ever visit has nothing to
+   * check, so it skips straight past this.
+   */
+  const [authChecking, setAuthChecking] = useState(() => getRememberedPhone() !== null);
 
   function advance() {
     setStep((s) => nextStep(s));
   }
 
   const playerId = session?.playerId;
+
+  /**
+   * A returning student typed their number once already; asking again on
+   * every visit is exactly the friction remembering it was meant to remove.
+   * Runs the same lookup the landing screen's submit does, straight from the
+   * remembered number, and skips it entirely on success.
+   */
+  useEffect(() => {
+    // A shared answers page has no landing screen to skip in the first place.
+    if (playCode) return;
+    const remembered = getRememberedPhone();
+    if (!remembered) return;
+    let cancelled = false;
+
+    void (async () => {
+      const result = await lookupPlayer(remembered);
+      if (cancelled) return;
+
+      if (result.kind === 'returning') {
+        setSession(result.session);
+        setPhone(result.session.phone);
+        setStep('transition');
+      } else if (result.kind === 'new' || result.kind === 'incomplete') {
+        // Remembered but never finished the intake — same as a fresh number.
+        setPhone(remembered);
+        setStep('intake');
+      }
+      // 'failed': fall through to the landing screen, phone already filled
+      // in, so the student can just retry rather than being stuck.
+      setAuthChecking(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // Only ever worth running once, straight from mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * Draw the round as soon as the player is registered, so the puzzle screen
@@ -111,6 +158,21 @@ export function App() {
           <img className="topbar-logo" src={logoUrl} alt="DBMCI" />
         </header>
         <PlayAnswersScreen code={playCode} />
+      </div>
+    );
+  }
+
+  if (authChecking) {
+    return (
+      <div className="device">
+        <header className="topbar">
+          <img className="topbar-logo" src={logoUrl} alt="DBMCI" />
+        </header>
+        <div className="screen screen-centred">
+          <div className="centred-block">
+            <p className="sub">Loading your game…</p>
+          </div>
+        </div>
       </div>
     );
   }

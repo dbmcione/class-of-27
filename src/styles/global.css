@@ -1339,6 +1339,22 @@ code {
   margin-top: 10px;
 }
 
+/* Same stacking as .screen-actions, minus its bold override — the
+   transition screen's primary button keeps the app's regular weight. */
+.transition-actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.transition-actions .btn {
+  margin-top: 0;
+}
+
+.transition-actions .btn + .btn {
+  margin-top: 10px;
+}
+
 .btn.secondary {
   display: flex;
   align-items: center;

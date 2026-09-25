@@ -1,3 +1,6 @@
+import { useRef, useState } from 'react';
+import { shareInvite, inviteShareHint } from '../lib/share';
+
 type Props = {
   name: string | undefined;
   questionCount: number;
@@ -11,7 +14,24 @@ function firstName(name: string | undefined): string {
   return first && first.length > 0 ? first : 'Doctor-to-be';
 }
 
+function ShareIcon() {
+  return (
+    <svg className="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.6" y1="10.5" x2="15.4" y2="6.5" />
+      <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
+    </svg>
+  );
+}
+
 export function TransitionScreen({ name, questionCount, ready, onStart }: Props) {
+  const [sharing, setSharing] = useState(false);
+  const [shareNote, setShareNote] = useState<string | null>(null);
+  // See ScoreScreen for why this needs to be a ref rather than just `sharing`.
+  const sharingRef = useRef(false);
+
   return (
     <div className="screen screen-centred">
       <div className="centred-block">
@@ -22,9 +42,38 @@ export function TransitionScreen({ name, questionCount, ready, onStart }: Props)
           Play again to take on a new set of cases.
         </p>
       </div>
-      <button className="btn" type="button" disabled={!ready} onClick={onStart}>
-        {ready ? 'Let’s Go' : 'Getting Your Questions…'}
-      </button>
+
+      <div className="transition-actions">
+        <button
+          className="btn secondary"
+          type="button"
+          disabled={sharing}
+          onClick={async () => {
+            if (sharingRef.current) return;
+            sharingRef.current = true;
+            setSharing(true);
+            setShareNote(null);
+            try {
+              const outcome = await shareInvite();
+              setShareNote(inviteShareHint(outcome) || null);
+            } finally {
+              sharingRef.current = false;
+              setSharing(false);
+            }
+          }}
+        >
+          <ShareIcon />
+          {sharing ? 'Preparing…' : 'Challenge a friend'}
+        </button>
+
+        <p className="share-note" role="status">
+          {shareNote ?? ''}
+        </p>
+
+        <button className="btn" type="button" disabled={!ready} onClick={onStart}>
+          {ready ? 'Let’s Go' : 'Getting Your Questions…'}
+        </button>
+      </div>
     </div>
   );
 }
