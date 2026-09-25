@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { RevealCard } from '../components/RevealCard';
+import { CourseNote } from '../components/CourseNote';
 import { PUZZLE_BANK, type Puzzle } from '../flow/bank';
 import { formatDuration } from '../flow/puzzle';
 import { fetchPlay, type Play } from '../lib/play';
@@ -83,6 +84,8 @@ export function PlayAnswersScreen({ code }: Props) {
           />
         ))}
       </ol>
+
+      <CourseNote />
 
       <a className="btn" href={homeHref(code)}>
         Play The Game

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { RevealCard } from '../components/RevealCard';
+import { CourseNote } from '../components/CourseNote';
 import type { Puzzle } from '../flow/bank';
 import type { PuzzleResult } from '../flow/round';
 
@@ -34,6 +35,8 @@ export function RevealScreen({ puzzles, results, onPlayAgain }: Props) {
           />
         ))}
       </ol>
+
+      <CourseNote />
 
       <button className="btn" type="button" onClick={onPlayAgain}>
         Play Again

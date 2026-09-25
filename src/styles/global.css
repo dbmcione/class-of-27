@@ -1667,6 +1667,12 @@ code {
   pointer-events: none;
 }
 
+/* Same panel on the answers page, with its button inside, under the copy. */
+.course-note .btn {
+  margin-top: 14px;
+  width: 100%;
+}
+
 .score-note p {
   margin: 0;
   text-align: center;
