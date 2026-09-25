@@ -348,6 +348,7 @@ label {
   right: 0;
   max-height: 268px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   margin: 0;
   padding: 8px;

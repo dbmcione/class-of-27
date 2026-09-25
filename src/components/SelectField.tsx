@@ -201,7 +201,14 @@ export function SelectField({
               aria-selected={option.id === value}
               className={`combo-option${index === activeIndex ? ' is-active' : ''}`}
               onPointerEnter={() => setActiveIndex(index)}
-              onPointerDown={(e) => {
+              // `onMouseDown`, not `onPointerDown`: a touch fires pointerdown
+              // the instant a finger lands, before the browser knows whether
+              // it's a tap or the start of a scroll — preventDefault there
+              // cancels the scroll gesture outright, which is why this list
+              // couldn't be scrolled by touch at all. A synthetic mousedown
+              // only fires once a touch resolves as a tap, so scrolling is
+              // untouched and a genuine tap still commits immediately.
+              onMouseDown={(e) => {
                 e.preventDefault();
                 commit(option);
               }}
