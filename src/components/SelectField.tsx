@@ -56,6 +56,9 @@ export function SelectField({
   const wrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  /** What the student last typed, kept after the box switches to showing
+   *  the pick, so reopening to change it resumes the same search. */
+  const keywordRef = useRef('');
 
   const selected = options.find((o) => o.id === value) ?? null;
 
@@ -118,7 +121,9 @@ export function SelectField({
   function openList() {
     if (loading) return;
     setOpen(true);
-    setQuery('');
+    // Changing an existing pick resumes the search that found it, rather
+    // than dropping back to the unfiltered list. They can edit it themselves.
+    setQuery(selected ? keywordRef.current : '');
     setActiveIndex(0);
   }
 
@@ -194,6 +199,7 @@ export function SelectField({
             disabled={loading}
             onChange={(e) => {
               if (!canSearch) return;
+              keywordRef.current = e.target.value;
               setQuery(e.target.value);
               setActiveIndex(0);
               setOpen(true);
