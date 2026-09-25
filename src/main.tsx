@@ -11,6 +11,12 @@ import './styles/global.css';
  */
 captureRef();
 
+// iOS Safari ignores user-scalable=no and touch-action for pinching, so its
+// proprietary gesture events are the only way to keep the page from zooming.
+for (const type of ['gesturestart', 'gesturechange'] as const) {
+  document.addEventListener(type, (event) => event.preventDefault());
+}
+
 const container = document.getElementById('root');
 if (!container) throw new Error('Missing #root element');
 
