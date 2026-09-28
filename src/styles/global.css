@@ -296,6 +296,19 @@ label {
 }
 
 .ombre-field input::placeholder { color: var(--muted); }
+
+/* Browsers paint their own pale fill and black text over an autofilled value,
+   and the fill can't be overridden directly. An inset shadow in the field's
+   own colour covers it, and the long transition keeps it from flashing. */
+.ombre-field input:-webkit-autofill,
+.ombre-field input:-webkit-autofill:hover,
+.ombre-field input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--ink);
+  caret-color: var(--ink);
+  -webkit-box-shadow: 0 0 0 1000px #0a0e28 inset;
+  box-shadow: 0 0 0 1000px #0a0e28 inset;
+  transition: background-color 600000s 0s;
+}
 .ombre-field input:disabled { cursor: wait; }
 
 @media (prefers-reduced-motion: no-preference) {
