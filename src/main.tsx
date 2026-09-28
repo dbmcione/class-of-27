@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { captureRef } from './lib/referral';
+import { installScrollDebug } from './lib/debugScroll';
 import './styles/global.css';
 
 /**
@@ -10,6 +11,7 @@ import './styles/global.css';
  * it happens exactly once, however the tree below re-renders.
  */
 captureRef();
+installScrollDebug();
 
 // iOS Safari ignores user-scalable=no and touch-action for pinching, so its
 // proprietary gesture events are the only way to keep the page from zooming.
