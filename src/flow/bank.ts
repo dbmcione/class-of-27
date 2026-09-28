@@ -19,10 +19,6 @@ import mtcSpecimenUrl from '../assets/puzzles/medullary-thyroid-carcinoma-specim
  * diagnosis?" on a clue). The sheet marks the correct option with a green
  * cell fill instead of a dedicated column; every row has exactly one.
  *
- * Skeletal Fluorosis (row 16) is left out on purpose: its hangman hint in
- * the sheet is a copy of Osteoid Osteoma's, so it would point at the wrong
- * answer. Add it once the sheet has its own hint.
- *
  * Ids are stable. Changing one loses the record of which students have
  * already been shown that puzzle.
  */
@@ -593,6 +589,37 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
         'Patient Health Questionnaire-9 (PHQ-9)',
       ],
       correctIndex: 0,
+    },
+  },
+  {
+    id: 'skeletal-fluorosis',
+    clue:
+      'Chronic excess fluoride exposure causes osteosclerosis, joint stiffness, ' +
+      'and calcification of ligaments.',
+    answer: 'SKELETAL FLUOROSIS',
+    definition:
+      'Skeletal fluorosis is a chronic toxic condition caused by excessive ' +
+      'fluoride accumulation in bones following prolonged fluoride exposure, ' +
+      'leading to increased bone density (osteosclerosis), joint stiffness and ' +
+      'pain and in severe cases, skeletal deformities and ligament calcification.',
+    tough: [
+      'Multi-step: The diagnosis must be identified first, before determining ' +
+      'which intervention will not be helpful.',
+      'Clinical scenario',
+    ],
+    mcq: {
+      stem:
+        'A 20-year-old resident of Andhra Pradesh presents with outward bending of ' +
+        'the lower limbs and signs of osteoporosis. His diet mainly consists of ' +
+        'rice and jowar roti. Which of the following intervention will not be ' +
+        'helpful?',
+      options: [
+        'Provision of running surface water for drinking',
+        'Change the water source',
+        'Fluoride supplementation',
+        'Add lime and alum to drinking water',
+      ],
+      correctIndex: 2,
     },
   },
   {
