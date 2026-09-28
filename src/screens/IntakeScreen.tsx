@@ -64,9 +64,12 @@ export function IntakeScreen({ phone, onDone }: Props) {
         .map((c) => ({ id: c.id, label: c.name }));
     }
     if (region === 'INTL') {
+      // Grouped by country, A–Z, then by name within each country. The sort
+      // is stable, so the name order from the query survives inside a group.
       return colleges
         .filter((c) => c.country !== 'IN')
-        .map((c) => ({ id: c.id, label: c.name, meta: collegeLocation(c) }));
+        .map((c) => ({ id: c.id, label: c.name, meta: collegeLocation(c) }))
+        .sort((a, b) => (a.meta ?? '').localeCompare(b.meta ?? ''));
     }
     return [];
   }, [colleges, region, stateName]);
