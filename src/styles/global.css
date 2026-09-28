@@ -223,6 +223,13 @@ p.sub {
 
 .field { margin-bottom: 16px; }
 
+/* Several dropdowns under one label, each revealed by the one above it. */
+.field-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 /* The landing page has one short field and a Start button, so it can afford
    more air between the description and the number. The intake form cannot. */
 .landing-form { margin-top: 52px; }
@@ -297,16 +304,6 @@ label {
 
 /* --- Combobox ------------------------------------------------------------ */
 .combo { position: relative; }
-
-.combo-icon {
-  width: 18px;
-  height: 18px;
-  flex: none;
-  fill: none;
-  stroke: var(--muted);
-  stroke-width: 2;
-  stroke-linecap: round;
-}
 
 .combo-chevron {
   flex: none;
@@ -404,20 +401,6 @@ label {
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-
-.combo-more {
-  padding: 10px 12px 4px;
-  font-size: 11.5px;
-  color: rgba(159, 176, 217, 0.6);
-  text-align: center;
-}
-
-.combo-empty {
-  padding: 14px 12px;
-  font-size: 13.5px;
-  color: var(--muted);
-  text-align: center;
 }
 
 .combo-list::-webkit-scrollbar { width: 6px; }

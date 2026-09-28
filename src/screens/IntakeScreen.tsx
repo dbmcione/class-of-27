@@ -11,12 +11,20 @@ type Props = {
   onDone: (session: Session) => void;
 };
 
+/** First step of picking a college. 'IN' is also College.country for India. */
+const REGIONS = [
+  { id: 'IN', label: 'India' },
+  { id: 'INTL', label: 'International' },
+];
+
 export function IntakeScreen({ phone, onDone }: Props) {
   const nameId = useId();
 
   const [colleges, setColleges] = useState<College[]>([]);
   const [loadingColleges, setLoadingColleges] = useState(true);
   const [collegesFailed, setCollegesFailed] = useState(false);
+  const [region, setRegion] = useState('');
+  const [stateName, setStateName] = useState('');
   const [collegeId, setCollegeId] = useState('');
   const [name, setName] = useState('');
   const [stage, setStage] = useState<StudyStage>();
@@ -37,6 +45,33 @@ export function IntakeScreen({ phone, onDone }: Props) {
       cancelled = true;
     };
   }, []);
+
+  const states = useMemo(
+    () =>
+      [
+        ...new Set(
+          colleges.flatMap((c) => (c.country === 'IN' && c.state ? [c.state] : [])),
+        ),
+      ].sort((a, b) => a.localeCompare(b)),
+    [colleges],
+  );
+
+  // Already sorted by name: fetchColleges orders the query.
+  const collegeOptions = useMemo(() => {
+    if (region === 'IN') {
+      return colleges
+        .filter((c) => c.country === 'IN' && c.state === stateName)
+        .map((c) => ({ id: c.id, label: c.name }));
+    }
+    if (region === 'INTL') {
+      return colleges
+        .filter((c) => c.country !== 'IN')
+        .map((c) => ({ id: c.id, label: c.name, meta: collegeLocation(c) }));
+    }
+    return [];
+  }, [colleges, region, stateName]);
+
+  const showCollegeList = region === 'INTL' || (region === 'IN' && stateName !== '');
 
   const unanswered = useMemo(
     () => QUESTIONS.filter((q) => answers[q.key] === undefined),
@@ -107,22 +142,42 @@ export function IntakeScreen({ phone, onDone }: Props) {
       <form className="form" onSubmit={handleSubmit} noValidate>
         <div className="field" id="college-field">
           <label htmlFor="college-select">Your College</label>
-          <SelectField
-            options={colleges.map((c) => ({
-              id: c.id,
-              label: c.name,
-              meta: collegeLocation(c),
-            }))}
-            value={collegeId}
-            loading={loadingColleges}
-            loadingLabel="Loading colleges…"
-            placeholder={
-              collegesFailed ? 'Couldn’t load colleges' : 'Type the college name or city'
-            }
-            searchable
-            minChars={3}
-            onChange={setCollegeId}
-          />
+          <div className="field-steps">
+            <SelectField
+              options={REGIONS}
+              value={region}
+              loading={loadingColleges}
+              loadingLabel="Loading colleges…"
+              placeholder={collegesFailed ? 'Couldn’t load colleges' : 'India or International?'}
+              onChange={(id) => {
+                if (id === region) return;
+                // A new region makes the state and college below it stale.
+                setRegion(id);
+                setStateName('');
+                setCollegeId('');
+              }}
+            />
+            {region === 'IN' && (
+              <SelectField
+                options={states.map((s) => ({ id: s, label: s }))}
+                value={stateName}
+                placeholder="Select your state"
+                onChange={(s) => {
+                  if (s === stateName) return;
+                  setStateName(s);
+                  setCollegeId('');
+                }}
+              />
+            )}
+            {showCollegeList && (
+              <SelectField
+                options={collegeOptions}
+                value={collegeId}
+                placeholder="Select your college"
+                onChange={setCollegeId}
+              />
+            )}
+          </div>
           {collegesFailed && (
             <p className="field-error" role="alert">
               We couldn’t load the college list. Check your connection and reload.
