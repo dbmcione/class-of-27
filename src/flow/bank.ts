@@ -3,18 +3,25 @@ import typhoidXrayUrl from '../assets/puzzles/typhoid-perforation-xray.png';
 import osteoidOsteomaCtUrl from '../assets/puzzles/osteoid-osteoma-ct.png';
 import retinoblastomaHistoUrl from '../assets/puzzles/retinoblastoma-histopathology.png';
 import bartterFaciesUrl from '../assets/puzzles/bartter-syndrome-facies.png';
+import amlSmearUrl from '../assets/puzzles/acute-myeloid-leukemia-smear.png';
+import keratoconusIntacsUrl from '../assets/puzzles/keratoconus-intacs.png';
+import lichenPlanusOralUrl from '../assets/puzzles/lichen-planus-oral.png';
+import filariasisSmearUrl from '../assets/puzzles/lymphatic-filariasis-microfilaria.png';
+import mtcSpecimenUrl from '../assets/puzzles/medullary-thyroid-carcinoma-specimen.png';
 
 /**
  * The puzzle bank.
  *
- * Every field here is verbatim from the team's source-of-truth spreadsheet
- * (apart from incidental whitespace). The first five rows came from "Final
- * sheet for activity.xlsx", which has no answer-key column: four of those
- * were carried over from an earlier recall sheet that did mark them, and the
- * fifth is flagged inline below. The ten added after them came from "Spot
- * The Diagnosis - Questions.xlsx", which marks the correct option with a
- * green cell fill instead of a dedicated column — every row there has
- * exactly one, so none needed the same inline flag.
+ * Every field here is verbatim from the team's source-of-truth spreadsheet,
+ * "Spot The Diagnosis - Questions.xlsx", apart from incidental whitespace,
+ * typographic quotes and dashes, and paste slips (a stray "D) " or ". " in
+ * front of an option, a phrase pasted twice, a trailing "What's the
+ * diagnosis?" on a clue). The sheet marks the correct option with a green
+ * cell fill instead of a dedicated column; every row has exactly one.
+ *
+ * Skeletal Fluorosis (row 16) is left out on purpose: its hangman hint in
+ * the sheet is a copy of Osteoid Osteoma's, so it would point at the wrong
+ * answer. Add it once the sheet has its own hint.
  *
  * Ids are stable. Changing one loses the record of which students have
  * already been shown that puzzle.
@@ -72,7 +79,6 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
     tough: [
       'Multi-step: The diagnosis must be identified first, before selecting the ' +
       'definitive treatment.',
-      'Integrated between subjects: Medicine and Radiology',
       'Image based',
       'Clinical scenario',
     ],
@@ -119,7 +125,6 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
       'with potassium and hydrogen ion loss, leading to hypertension, hypokalemia ' +
       'and metabolic alkalosis.',
     tough: [
-      'Integrated between subjects: Medicine and Radiology',
       'Clinical decision making: The patient has confirmed primary ' +
       'hyperaldosteronism. The next step is to determine whether the excess ' +
       'aldosterone is unilateral or bilateral, which is done by adrenal vein ' +
@@ -137,7 +142,7 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
         'the further management of this patient?',
       options: [
         'CT abdomen with adrenal biopsy',
-        'Adrenal Vein sampling',
+        'Adrenal vein sampling',
         'MRI abdomen',
         'MIBG',
       ],
@@ -147,8 +152,8 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
   {
     id: 'aortic-dissection',
     clue:
-      'A patient presents with sudden-onset tearing chest pain radiating to the ' +
-      'back, with unequal blood pressure between the arms.',
+      'A patient presents with sudden-onset, severe tearing chest pain radiating ' +
+      'to the back, with unequal blood pressure between the arms.',
     answer: 'AORTIC DISSECTION',
     definition:
       'Aortic dissection is a condition in which a tear in the aortic intima allows ' +
@@ -157,7 +162,6 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
     tough: [
       'Multi-step: The diagnosis must be identified first, before choosing the ' +
       'confirmatory investigation.',
-      'Integrated between subjects: Medicine and Radiology',
       'Clinical scenario',
     ],
     mcq: {
@@ -184,7 +188,7 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
     id: 'vestibular-schwannoma',
     clue:
       'A patient presents with progressive unilateral hearing loss, tinnitus, and ' +
-      'imbalance. MRI shows a cerebellopontine angle mass.',
+      'imbalance. MRI shows a mass in the cerebellopontine angle.',
     answer: 'VESTIBULAR SCHWANNOMA',
     definition:
       'Vestibular schwannoma is a benign, usually slow-growing Schwann-cell tumour ' +
@@ -216,8 +220,8 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
   {
     id: 'tumour-lysis-syndrome',
     clue:
-      'A patient with Burkitt lymphoma develops nausea, muscle cramps, and reduced ' +
-      'urine output within 24 hours of starting chemotherapy.',
+      'A patient with Burkitt’s lymphoma develops nausea, vomiting, muscle cramps ' +
+      'and reduced urine output within 24 hours of starting chemotherapy.',
     answer: 'TUMOUR LYSIS SYNDROME',
     definition:
       'Tumor lysis syndrome (TLS) is an oncological emergency caused by rapid ' +
@@ -229,22 +233,13 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
     tough: [
       'Multi-step: The diagnosis must be identified first, before choosing the next ' +
       'step in management.',
-      'Integrated between subjects: Paediatrics and Medicine',
       'Clinical scenario',
     ],
-    /**
-     * ⚠️ correctIndex is NOT from the sheet. The sheet has no answer key
-     * column, and unlike the other four this question did not appear on the
-     * earlier recall sheet either, so there was nothing to carry over.
-     * Rasburicase is the standard answer for established tumour lysis with a
-     * high uric acid and a rising creatinine, but it is an inference and a
-     * wrong key teaches the wrong thing. Confirm before students see this.
-     */
     mcq: {
       stem:
-        'A 7–year–old boy presented with abdominal pain, vomiting, oliguria, and ' +
+        'A 7-year-old boy presented with abdominal pain, vomiting, oliguria and ' +
         'periorbital puffiness following chemotherapy. Investigations reveal ' +
-        'hyperuricemia, raised creatinine levels, and hyperkalemia. What is the next ' +
+        'hyperuricemia, raised creatinine levels and hyperkalemia. What is the next ' +
         'best step in the management of this condition?',
       options: [
         'Hydration',
@@ -598,6 +593,277 @@ export const PUZZLE_BANK: readonly Puzzle[] = [
         'Patient Health Questionnaire-9 (PHQ-9)',
       ],
       correctIndex: 0,
+    },
+  },
+  {
+    id: 'follicular-lymphoma',
+    clue:
+      'A young woman presents with painless cervical lymphadenopathy. The biopsy ' +
+      'shows many small centrocytes with occasional centroblasts, and the cells ' +
+      'are CD10⁺ and BCL-2⁺.',
+    answer: 'FOLLICULAR LYMPHOMA',
+    definition:
+      'Follicular lymphoma is an indolent B-cell non-Hodgkin lymphoma arising from ' +
+      'germinal-center B cells, commonly associated with t(14;18) translocation ' +
+      'and BCL2 overexpression.',
+    tough: [
+      'Multi-step: The diagnosis must be identified first, before determining the ' +
+      'most common genetic defect.',
+      'Clinical scenario',
+    ],
+    mcq: {
+      stem:
+        'A 28-year-old female presents with multiple cervical lymphadenopathies. ' +
+        'IHC markers were positive for CD10 and BCL-2. Peripheral smear shows a ' +
+        'large number of small cells (centrocytes) and occasional large cells ' +
+        '(centroblasts). What is the most common genetic defect in this condition?',
+      options: [
+        't(14;18) BCL2-IGH',
+        't(2;5) ALK',
+        't(11;18) MALT1',
+        't(11;14) Cyclin D1-IGH',
+      ],
+      correctIndex: 0,
+    },
+  },
+  {
+    id: 'acute-myeloid-leukemia',
+    clue:
+      'An adult presents with fatigue and bleeding. The peripheral smear is ' +
+      'packed with blasts, with a few showing characteristic needle-like Auer ' +
+      'rods.',
+    answer: 'ACUTE MYELOID LEUKEMIA',
+    definition:
+      'Acute myeloid leukemia (AML) is a malignant disorder of myeloid precursor ' +
+      'cells, characterized by uncontrolled proliferation and accumulation of ' +
+      'abnormal myeloid blasts. It results from acquired genetic abnormalities ' +
+      'that disrupt normal myeloid differentiation and proliferation, leading to ' +
+      'bone marrow failure with anemia, infections, and bleeding.',
+    tough: [
+      'Multi-step: The diagnosis must be identified first, before determining the ' +
+      'most common genetic abnormality.',
+      'Clinical scenario',
+      'Image based',
+    ],
+    image: {
+      src: amlSmearUrl,
+      width: 604,
+      height: 410,
+      alt:
+        'Peripheral blood smear showing a cluster of large blast cells with ' +
+        'purple granular cytoplasm among pale red cells. One cell at the lower ' +
+        'right contains bundles of fine, needle-like Auer rods.',
+    },
+    mcq: {
+      stem:
+        'A 60-year-old man presents with weakness, fatigue and bleeding tendencies. ' +
+        'His peripheral smear shows 25% blast-like cells, as shown in the image. ' +
+        'What is the most common type of genetic abnormality seen in this ' +
+        'hematological malignancy?',
+      options: ['inv(16)', 't(8;21)', 'AML with NPM1', 't(15;17)'],
+      correctIndex: 2,
+    },
+  },
+  {
+    id: 'keratoconus',
+    clue: 'Progressive blurring of vision with a cone-shaped bulging of the cornea.',
+    answer: 'KERATOCONUS',
+    definition:
+      'Keratoconus is a progressive, non-inflammatory corneal disorder ' +
+      'characterized by thinning and cone-shaped protrusion of the cornea, ' +
+      'causing irregular astigmatism and visual distortion.',
+    tough: [
+      'Multi-step: The procedure must be identified first, before determining its ' +
+      'indication.',
+      'Clinical scenario',
+      'Image based',
+    ],
+    image: {
+      src: keratoconusIntacsUrl,
+      width: 434,
+      height: 354,
+      alt:
+        'Close-up photograph of an eye with two thin, clear arc-shaped segments ' +
+        'set within the cornea, encircling the pupil just inside the edge of ' +
+        'the iris — intracorneal ring segments.',
+    },
+    mcq: {
+      stem: 'What is the indication of the given procedure shown in the image?',
+      options: ['Keratoconus', 'Keratoglobus', 'Vogt’s limbal girdle', 'Corneal dystrophy'],
+      correctIndex: 0,
+    },
+  },
+  {
+    id: 'ankylosing-spondylitis',
+    clue:
+      'Young adult with chronic inflammatory back pain, morning stiffness and ' +
+      'bilateral sacroiliitis with bamboo spine on X-ray.',
+    answer: 'ANKYLOSING SPONDYLITIS',
+    definition:
+      'Ankylosing spondylitis is a chronic inflammatory disease primarily ' +
+      'affecting the sacroiliac joints and spine, causing inflammatory back pain, ' +
+      'progressive spinal stiffness, and in advanced disease, fusion of the ' +
+      'vertebrae.',
+    tough: [
+      'Multi-step: The diagnosis must be identified first, before selecting the ' +
+      'next step in evaluation.',
+      'Clinical scenario',
+    ],
+    mcq: {
+      stem:
+        'A 27-year-old individual presents with chronic lower back pain that ' +
+        'improves with physical activity and is associated with early morning ' +
+        'stiffness. There is a past history of anterior uveitis. A recent X-ray of ' +
+        'the sacroiliac joints appears normal. What is the most appropriate next ' +
+        'step in evaluation?',
+      options: [
+        'MRI of the sacroiliac joints',
+        'Anti-CCP antibody testing',
+        'Repeat plain radiograph',
+        'CT scan of the sacroiliac joints',
+      ],
+      correctIndex: 0,
+    },
+  },
+  {
+    id: 'lichen-planus',
+    clue:
+      'A patient develops intensely itchy, violaceous, flat-topped papules with ' +
+      'Wickham striae, mainly affecting the flexor surfaces of the wrists and ' +
+      'ankles.',
+    answer: 'LICHEN PLANUS',
+    definition:
+      'Lichen planus is a chronic, immune-mediated inflammatory disorder of the ' +
+      'skin and mucous membranes, characterized by pruritic, violaceous, ' +
+      'flat-topped papules and plaques, often with Wickham striae.',
+    tough: [
+      'Multi-step: The oral lesion must be identified first, before determining ' +
+      'the causative medication.',
+      'Clinical scenario',
+      'Image based',
+    ],
+    image: {
+      src: lichenPlanusOralUrl,
+      width: 648,
+      height: 560,
+      alt:
+        'Photograph inside the mouth, with the cheek held back by a dental ' +
+        'mirror, showing a lacy network of white streaks over a reddened area ' +
+        'of the inner cheek beside the lower back teeth.',
+    },
+    mcq: {
+      stem:
+        'A patient presents with the following oral lesions and reports a burning ' +
+        'sensation while eating spicy food. Which of the following medications is ' +
+        'most likely cause these lesions?',
+      options: ['Lithium', 'Beta Blockers', 'Fluconazole', 'Ciprofloxacin'],
+      correctIndex: 1,
+    },
+  },
+  {
+    id: 'lymphatic-filariasis',
+    clue:
+      'A patient from a tropical region develops recurrent fever with painful ' +
+      'lymphangitis, followed by progressive lymphedema and thickening of the ' +
+      'skin of the legs.',
+    answer: 'LYMPHATIC FILARIASIS',
+    definition:
+      'Lymphatic filariasis is a chronic parasitic infection of the lymphatic ' +
+      'system caused by filarial nematodes, leading to lymphatic obstruction, ' +
+      'recurrent lymphangitis, lymphedema.',
+    tough: [
+      'Multi-step: The parasitic infection must be identified first, before ' +
+      'determining the underlying pathophysiologic mechanism.',
+      'Clinical scenario',
+      'Image based',
+    ],
+    image: {
+      src: filariasisSmearUrl,
+      width: 440,
+      height: 296,
+      alt:
+        'Stained peripheral blood smear showing a single long, slender, ' +
+        'thread-like purple worm curving across the field — a microfilaria — ' +
+        'among scattered dark-stained white cell nuclei.',
+    },
+    mcq: {
+      stem:
+        'A man from an endemic region has developed progressive leg swelling. ' +
+        'Peripheral smear reveals the following parasitic organism. Which ' +
+        'pathophysiologic mechanism is most likely responsible?',
+      options: [
+        'Hypoalbuminemia',
+        'Lymphatic obstruction',
+        'Hypoproteinemia',
+        'Increased hydrostatic pressure',
+      ],
+      correctIndex: 1,
+    },
+  },
+  {
+    id: 'pheochromocytoma',
+    clue:
+      'A tumor of the adrenal medulla causes episodic headache, sweating, ' +
+      'palpitations and hypertension.',
+    answer: 'PHEOCHROMOCYTOMA',
+    definition:
+      'Pheochromocytoma is a catecholamine-secreting tumor arising from chromaffin ' +
+      'cells, most commonly in the adrenal medulla. It produces excess epinephrine ' +
+      'and norepinephrine, classically causing episodic headache, sweating, ' +
+      'palpitations and hypertension.',
+    tough: [
+      'Multi-step: The diagnosis must be identified first, before selecting the ' +
+      'appropriate drug.',
+      'Clinical scenario',
+    ],
+    mcq: {
+      stem:
+        'A patient with hypertensive episodes, with an MRI abdomen showing a ' +
+        'suprarenal mass, is planned for surgery. 24-hour urine shows metanephrine ' +
+        'levels to be elevated. What drug will be given preoperatively and also ' +
+        'intraoperatively?',
+      options: ['Nicardipine', 'Esmolol', 'Clonidine', 'Phenoxybenzamine'],
+      correctIndex: 0,
+    },
+  },
+  {
+    id: 'medullary-thyroid-carcinoma',
+    clue:
+      'A thyroid tumor arising from parafollicular cells, often associated with ' +
+      'elevated calcitonin levels.',
+    answer: 'MEDULLARY THYROID CARCINOMA',
+    definition:
+      'Medullary thyroid carcinoma (MTC) is a malignant tumor arising from the ' +
+      'parafollicular C cells of the thyroid gland, characterized by calcitonin ' +
+      'secretion. It may occur sporadically or as part of MEN 2 due to RET ' +
+      'mutations.',
+    tough: [
+      'Multi-step: The surgical procedure and underlying diagnosis must be ' +
+      'identified first, before determining the likely postoperative ' +
+      'complication.',
+      'Clinical scenario',
+    ],
+    image: {
+      src: mtcSpecimenUrl,
+      width: 404,
+      height: 400,
+      alt:
+        'Photograph of a surgically removed thyroid gland laid flat, showing ' +
+        'both lobes joined by the isthmus, with a yellow arrow pointing to the ' +
+        'upper part of the left-hand lobe.',
+    },
+    mcq: {
+      stem:
+        'A malignant neck swelling was surgically removed from a patient, shown in ' +
+        'the image below. What will the patient likely present with 2-3 days after ' +
+        'the procedure?',
+      options: [
+        'Deviation of angle of mouth',
+        'Hoarseness of voice',
+        'Carpopedal spasm',
+        'Migratory thrombophlebitis',
+      ],
+      correctIndex: 2,
     },
   },
 ];
