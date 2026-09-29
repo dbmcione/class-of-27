@@ -11,12 +11,48 @@
  * unique in the database. So a rerun is harmless and a missed run just
  * catches up on the next one.
  *
+ * INCREMENTAL. Each run asks Supabase only for students who have saved a
+ * round since the last run, not for everyone. Reading everyone every minute
+ * used up the free plan's monthly data transfer at around 1,500 students.
+ * Where the last run got to is kept in Script Properties as a bookmark; see
+ * BOOKMARK_PROPERTY below.
+ *
  * The credentials are NOT in this file. They live in Script Properties, set
  * once in the editor, so the key is not sitting in something you might share.
  */
 
-/** The view to read. Its columns become the sheet's columns, in order. */
-var VIEW = 'lead_export';
+/**
+ * The database function to read (supabase/migration-incremental-leads.sql).
+ * It returns lead_export's columns, which become the sheet's columns, in
+ * order, plus the bookmark column below.
+ */
+var SOURCE_FUNCTION = 'lead_export_since';
+
+/**
+ * When this student's latest round was saved, in milliseconds. Used to move
+ * the bookmark forward and then dropped: it is never written to the sheet,
+ * so the sheet's columns stay exactly as they were.
+ */
+var BOOKMARK_COLUMN = 'last_round_ms';
+
+/**
+ * The Script Property holding the latest round time already handled.
+ *
+ * Delete this property to make the next run re-check every student from the
+ * beginning. That is safe (anyone already in the sheet is still skipped on
+ * phone), and it is also the first run's behaviour, when there is no bookmark
+ * yet.
+ */
+var BOOKMARK_PROPERTY = 'LEADS_SYNCED_UNTIL_MS';
+
+/**
+ * Each run starts this far before the bookmark rather than exactly at it. A
+ * round is stamped with the time its save began, so one that took a moment
+ * to land could otherwise carry a time just behind a bookmark set by a run
+ * that did not see it yet. Re-reading ten minutes costs a few rows; missing a
+ * student costs a lead.
+ */
+var OVERLAP_MS = 10 * 60 * 1000;
 
 /**
  * The database stores the answers page's short code, not its address. The
@@ -82,11 +118,45 @@ function refreshLeads() {
     );
   }
 
-  var rows = fetchAll_(url.replace(/\/+$/, ''), key);
-  if (rows.length === 0) {
-    Logger.log('Supabase returned no students. Nothing to add.');
+  // A run every minute can still overlap the one before if that one was slow.
+  // Two runs reading the sheet at once would each see a student as new and
+  // both add them, and the student would be messaged twice. So a run that
+  // finds another still going skips its turn; the next one catches up.
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(0)) {
+    Logger.log('The previous run is still going. Skipping this one.');
     return;
   }
+
+  try {
+    syncLeads_(props, url, key);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function syncLeads_(props, url, key) {
+  var bookmark = Number(props.getProperty(BOOKMARK_PROPERTY)) || 0;
+  var since = new Date(Math.max(0, bookmark - OVERLAP_MS)).toISOString();
+
+  var rows = fetchSince_(url.replace(/\/+$/, ''), key, since);
+  if (rows.length === 0) {
+    Logger.log('No rounds saved since ' + since + '. Nothing to add.');
+    return;
+  }
+
+  // Worked out now, but only saved once the sheet has been written. A run
+  // that fails partway leaves the bookmark where it was, so the next run
+  // reads the same students again instead of skipping past them.
+  var nextBookmark = bookmark;
+  rows = rows.map(function (row) {
+    nextBookmark = Math.max(nextBookmark, Number(row[BOOKMARK_COLUMN]) || 0);
+    var copy = {};
+    Object.keys(row).forEach(function (k) {
+      if (k !== BOOKMARK_COLUMN) copy[k] = row[k];
+    });
+    return copy;
+  });
 
   var gameUrl = (props.getProperty('GAME_URL') || '').replace(/\/+$/, '');
   var apiUrl = url.replace(/\/+$/, '');
@@ -105,6 +175,9 @@ function refreshLeads() {
   });
 
   if (fresh.length === 0) {
+    // Everyone read was already in the sheet (students playing again), so
+    // there is nothing to write, but the bookmark can still move past them.
+    props.setProperty(BOOKMARK_PROPERTY, String(nextBookmark));
     Logger.log('No new students. Sheet untouched.');
     return;
   }
@@ -127,6 +200,9 @@ function refreshLeads() {
   sheet
     .getRange(sheet.getLastRow() + 1, 1, table.length, headers.length)
     .setValues(table);
+  // Before the bookmark: the rows must be in before the run is marked done.
+  SpreadsheetApp.flush();
+  props.setProperty(BOOKMARK_PROPERTY, String(nextBookmark));
 
   Logger.log('Added ' + fresh.length + ' new student(s).');
 }
@@ -245,17 +321,20 @@ function existingPhones_(sheet) {
   return seen;
 }
 
-function fetchAll_(url, key) {
+/** Every student who has saved a round after `since`, a page at a time. */
+function fetchSince_(url, key, since) {
   var all = [];
   var offset = 0;
 
   while (true) {
     var endpoint =
-      url + '/rest/v1/' + VIEW +
-      '?select=*&order=' + ORDER + '&limit=' + PAGE + '&offset=' + offset;
+      url + '/rest/v1/rpc/' + SOURCE_FUNCTION +
+      '?order=' + ORDER + '&limit=' + PAGE + '&offset=' + offset;
 
     var res = UrlFetchApp.fetch(endpoint, {
-      method: 'get',
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify({ p_since: since }),
       headers: { apikey: key, Authorization: 'Bearer ' + key },
       muteHttpExceptions: true,
     });
@@ -278,6 +357,6 @@ function installTrigger() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
     if (t.getHandlerFunction() === 'refreshLeads') ScriptApp.deleteTrigger(t);
   });
-  ScriptApp.newTrigger('refreshLeads').timeBased().everyMinutes(15).create();
-  Logger.log('Refreshing every 15 minutes.');
+  ScriptApp.newTrigger('refreshLeads').timeBased().everyMinutes(1).create();
+  Logger.log('Refreshing every minute.');
 }
