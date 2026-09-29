@@ -170,7 +170,8 @@ export function ScoreScreen({
 
   /**
    * The card goes to the bucket under this round's own code, which is what
-   * lets the sheet work out its address without storing one.
+   * lets the sheet work out its address without storing one. Only for the
+   * student's first round: uploadScorecard skips the rest.
    *
    * Nothing here is cancelled on unmount, unlike every other effect on this
    * screen. A student who taps through to the answers a second after the

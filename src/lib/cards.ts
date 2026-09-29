@@ -33,7 +33,23 @@ function isAlreadyThere(error: unknown): boolean {
 }
 
 /**
- * Uploads the card, quietly.
+ * Only a student's first finished round needs a card: the card exists for
+ * the WhatsApp message, and each student is messaged once, about that round.
+ * The bucket refuses any other round's card anyway
+ * (supabase/migration-first-round-cards.sql); asking first just saves a
+ * replay from sending a 100 KB image to be turned away.
+ *
+ * If the question itself fails, the upload goes ahead and the bucket decides.
+ */
+async function isFirstRound(code: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { data, error } = await supabase.rpc('play_code_is_first', { p_code: code });
+  if (error) return true;
+  return data === true;
+}
+
+/**
+ * Uploads the card if this is the student's first round, quietly.
  *
  * Nothing about this is worth showing the student: they have their score, and
  * a card that failed to upload only means the message they get later carries
@@ -43,6 +59,7 @@ function isAlreadyThere(error: unknown): boolean {
  */
 export async function uploadScorecard(code: string, blob: Blob): Promise<boolean> {
   if (!supabase) return false;
+  if (!(await isFirstRound(code))) return false;
 
   const path = cardPath(code);
 

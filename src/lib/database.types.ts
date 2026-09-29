@@ -197,6 +197,10 @@ export type Database = {
         /** The share code for the round just written. */
         Returns: string;
       };
+      play_code_is_first: {
+        Args: { p_code: string };
+        Returns: boolean;
+      };
       get_play: {
         Args: { p_code: string };
         Returns: {
