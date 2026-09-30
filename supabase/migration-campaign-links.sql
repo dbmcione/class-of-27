@@ -7,9 +7,11 @@
 --
 -- Each campaign gets a code in campaign_links. A link carrying one:
 --
---   https://class-of-27.vercel.app/?ref=faculty
+--   https://class-of-27.vercel.app/?ref=dmnth2
 --
--- records the student as source = 'campaign', referred_by_code = 'faculty'.
+-- records the student as source = 'campaign', referred_by_code = 'dmnth2'.
+-- The codes are random on purpose: a link reading ?ref=faculty tells anyone
+-- who sees it exactly what is being tracked. The label says who each is.
 -- Round codes still record as 'share' exactly as before, and anything else
 -- still counts as 'direct'.
 --
@@ -34,8 +36,8 @@ alter table public.campaign_links enable row level security;
 revoke all on public.campaign_links from public, anon, authenticated;
 
 insert into public.campaign_links (code, label) values
-  ('marketing', 'Marketing team'),
-  ('faculty',   'Faculty Instagram')
+  ('nhp674', 'Marketing team'),
+  ('dmnth2', 'Faculty Instagram')
 on conflict (code) do nothing;
 
 -- ---------------------------------------------------------------------------
