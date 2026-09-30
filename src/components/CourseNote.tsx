@@ -1,4 +1,7 @@
-const COURSE_URL = 'https://dbmci.com/class-of-27';
+// The UTM tags are marketing's, so their analytics can tell visits from this
+// button apart from every other route onto the course page.
+const COURSE_URL =
+  'https://dbmci.one/class-of-27?utm_source=std_game&utm_medium=explore_button&utm_campaign=live27';
 
 /** The Class of ’27 pitch at the foot of the answers page, after the MCQs. */
 export function CourseNote() {
@@ -10,7 +13,7 @@ export function CourseNote() {
         pattern of NEET PG MCQs.
       </p>
       {/* New tab so the answers page is still there to come back to. No
-          noreferrer, so dbmci.com can see the visit came from the game. */}
+          noreferrer, so dbmci.one can see the visit came from the game. */}
       <a className="btn secondary" href={COURSE_URL} target="_blank" rel="noopener">
         Know more about Class of ’27
       </a>
