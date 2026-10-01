@@ -12,16 +12,13 @@ type Props = {
 
 /** All five questions with their answers, MCQs and tags, after the round. */
 export function RevealScreen({ puzzles, results, onPlayAgain }: Props) {
-  const solvedCount = results.filter((r) => r.solved).length;
   // One card open at a time; opening another closes the previous one.
   const [openId, setOpenId] = useState<string | null>(null);
 
   return (
     <div className="screen reveal-screen">
       <h1>The Answers</h1>
-      <p className="sub">
-        You solved {solvedCount} of {results.length}. Tap any card for the full explanation.
-      </p>
+      <p className="sub">Tap any card to view the sample NEET PG question.</p>
 
       <ol className="reveal-list">
         {puzzles.map((puzzle, i) => (
