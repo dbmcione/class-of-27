@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { RevealCard } from '../components/RevealCard';
 import { CourseNote } from '../components/CourseNote';
 import { PUZZLE_BANK, type Puzzle } from '../flow/bank';
-import { formatDuration } from '../flow/puzzle';
 import { fetchPlay, type Play } from '../lib/play';
 import { linkWithRef } from '../lib/referral';
 
@@ -67,10 +66,7 @@ export function PlayAnswersScreen({ code }: Props) {
   return (
     <div className="screen reveal-screen">
       <h1>{play.firstName ? `${play.firstName}, here are your answers` : 'Your answers'}</h1>
-      <p className="sub">
-        You scored {play.solved} of {play.total} in {formatDuration(play.totalSeconds)}.
-        Tap any card for the full explanation.
-      </p>
+      <p className="sub">Tap any card to view the sample NEET PG question.</p>
 
       <ol className="reveal-list">
         {cards.map(({ puzzle, result }, i) => (
