@@ -57,9 +57,15 @@ async function isFirstRound(code: string): Promise<boolean> {
  * the result. One retry, because the common failure here is a phone dropping
  * off the network for a moment on the walk out of a lecture hall.
  */
-export async function uploadScorecard(code: string, blob: Blob): Promise<boolean> {
+export async function uploadScorecard(
+  code: string,
+  blob: Blob,
+  /** Already known from the save, which saves asking; see SaveResult. */
+  knownFirst?: boolean,
+): Promise<boolean> {
   if (!supabase) return false;
-  if (!(await isFirstRound(code))) return false;
+  const first = knownFirst ?? (await isFirstRound(code));
+  if (!first) return false;
 
   const path = cardPath(code);
 

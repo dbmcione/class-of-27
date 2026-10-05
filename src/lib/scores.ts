@@ -37,12 +37,53 @@ export function summarise(results: readonly PuzzleResult[]): RoundScore {
   };
 }
 
+/** How many rows of the college board the score screen shows. */
+export const BOARD_TOP = 5;
+
 /** A saved round, and the code its answers page lives at. */
 export type SaveResult = {
   ok: boolean;
   /** Null when the round could not be saved, or when Supabase is not set up. */
   code: string | null;
+  /**
+   * Whether this was the student's first finished round, so whether its
+   * scorecard is uploaded. Undefined when the save came back without the
+   * board (see saveRound), and the upload then asks for itself.
+   */
+  isFirst?: boolean;
+  /**
+   * The top of the college board and the student's own place, read in the
+   * same call as the save. Undefined in the same case, and the score screen
+   * then fetches them itself.
+   */
+  board?: LeaderboardEntry[];
+  place?: BoardPlace | null;
 };
+
+type BoardRowData = {
+  rank: number;
+  player_id: string;
+  display_name: string;
+  solved: number;
+  total: number;
+  total_seconds: number;
+};
+
+function toEntry(row: BoardRowData): LeaderboardEntry {
+  return {
+    rank: Number(row.rank),
+    playerId: row.player_id,
+    displayName: row.display_name,
+    solved: row.solved,
+    total: row.total,
+    totalSeconds: row.total_seconds,
+  };
+}
+
+/** PostgREST's "no such function": the database has not been migrated yet. */
+function isMissingFunction(error: { code?: string } | null): boolean {
+  return error?.code === 'PGRST202';
+}
 
 export async function saveRound(args: {
   playerId: string;
@@ -64,13 +105,7 @@ export async function saveRound(args: {
     return { ok: true, code: null };
   }
 
-  /**
-   * One call rather than two inserts. The round and its per-puzzle detail
-   * should not be able to half-succeed, and the share code has to come back
-   * with the write: it is generated in the database, where uniqueness can
-   * actually be enforced.
-   */
-  const { data, error } = await supabase.rpc('save_round', {
+  const round = {
     p_player_id: playerId,
     p_college_id: collegeId,
     p_solved: score.solved,
@@ -82,7 +117,41 @@ export async function saveRound(args: {
       seconds: r.seconds,
       wrongGuesses: r.wrongGuesses,
     })),
-  });
+  };
+
+  /**
+   * One call for the whole score screen: the save, the board, the student's
+   * place and whether to upload the scorecard. Every request is logged by
+   * Supabase (twice, counting the browser's OPTIONS check), and these four
+   * always ran back to back.
+   */
+  const combined = await supabase.rpc('save_round_and_board', { ...round, p_top: BOARD_TOP });
+
+  if (!combined.error && combined.data) {
+    const d = combined.data;
+    return {
+      ok: true,
+      code: typeof d.code === 'string' ? d.code : null,
+      isFirst: d.is_first === true,
+      board: (d.board ?? []).map(toEntry),
+      place: d.place
+        ? { entry: toEntry(d.place), boardSize: Number(d.place.board_size) }
+        : null,
+    };
+  }
+
+  // Only a database without migration-fewer-requests.sql falls through to
+  // here. Anything else is a real failure, and retrying the save through
+  // save_round could record the round twice.
+  if (!isMissingFunction(combined.error)) return { ok: false, code: null };
+
+  /**
+   * One call rather than two inserts. The round and its per-puzzle detail
+   * should not be able to half-succeed, and the share code has to come back
+   * with the write: it is generated in the database, where uniqueness can
+   * actually be enforced.
+   */
+  const { data, error } = await supabase.rpc('save_round', round);
 
   // The leaderboard is driven by this write, so a failure here is what the
   // player would notice.
@@ -128,17 +197,7 @@ export async function fetchOwnPlace(
 
   if (error || !data || data.length === 0) return null;
   const row = data[0]!;
-  return {
-    entry: {
-      rank: Number(row.rank),
-      playerId: row.player_id,
-      displayName: row.display_name,
-      solved: row.solved,
-      total: row.total,
-      totalSeconds: row.total_seconds,
-    },
-    boardSize: Number(row.board_size),
-  };
+  return { entry: toEntry(row), boardSize: Number(row.board_size) };
 }
 
 export async function fetchLeaderboard(
@@ -176,12 +235,5 @@ export async function fetchLeaderboard(
   });
 
   if (error || !data) return [];
-  return data.map((row) => ({
-    rank: Number(row.rank),
-    playerId: row.player_id,
-    displayName: row.display_name,
-    solved: row.solved,
-    total: row.total,
-    totalSeconds: row.total_seconds,
-  }));
+  return data.map(toEntry);
 }

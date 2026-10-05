@@ -201,6 +201,41 @@ export type Database = {
         Args: { p_code: string };
         Returns: boolean;
       };
+      /** save_round, college_leaderboard, college_rank and play_code_is_first in one call. */
+      save_round_and_board: {
+        Args: {
+          p_player_id: string;
+          p_college_id: string;
+          p_solved: number;
+          p_total: number;
+          p_total_seconds: number;
+          p_results: {
+            puzzleId: string;
+            solved: boolean;
+            seconds: number;
+            wrongGuesses: number;
+          }[];
+          p_top?: number;
+        };
+        Returns: {
+          code: string;
+          is_first: boolean;
+          board: BoardRow[];
+          place: (BoardRow & { board_size: number }) | null;
+        };
+      };
+      /** register_player and save_intake in one call. */
+      register_with_intake: {
+        Args: {
+          p_college_id: string;
+          p_phone: string;
+          p_ref: string | null;
+          p_name: string;
+          p_stage: string;
+          p_answers: Record<string, string>;
+        };
+        Returns: string;
+      };
       get_play: {
         Args: { p_code: string };
         Returns: {
@@ -216,6 +251,16 @@ export type Database = {
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;
   };
+};
+
+/** One leaderboard row, as the board functions return it. */
+type BoardRow = {
+  rank: number;
+  player_id: string;
+  display_name: string;
+  solved: number;
+  total: number;
+  total_seconds: number;
 };
 
 export type CollegeRow = Database['public']['Tables']['colleges']['Row'];

@@ -18,6 +18,12 @@ const LOCAL_STORE_KEY = 'class-of-27:players';
 export async function registerPlayer(
   collegeId: string,
   phone: string,
+  /**
+   * The Quick Intro, saved in the same call when given. Registering and
+   * saving the intro always ran back to back, and each request is logged by
+   * Supabase, so they are one request now.
+   */
+  intake?: Intake,
 ): Promise<RegisterResult> {
   const cleanPhone = normalisePhone(phone);
   // Whoever's link brought them here, if anyone's. Read at this moment rather
@@ -35,7 +41,28 @@ export async function registerPlayer(
     } catch {
       // Private browsing or full quota — the flow should still continue.
     }
+    if (intake) void saveIntake(playerId, intake);
     return { ok: true, playerId };
+  }
+
+  if (intake) {
+    const combined = await supabase.rpc('register_with_intake', {
+      p_college_id: collegeId,
+      p_phone: cleanPhone,
+      p_ref: ref,
+      p_name: intake.name,
+      p_stage: intake.stage,
+      p_answers: intake.answers,
+    });
+    if (!combined.error && combined.data) return { ok: true, playerId: combined.data };
+    // Anything but "no such function" is a real failure. Only a database
+    // without migration-fewer-requests.sql goes on to the two-call way below.
+    if (combined.error?.code !== 'PGRST202') {
+      return {
+        ok: false,
+        message: 'We couldn’t save your details. Please try again in a moment.',
+      };
+    }
   }
 
   const { data, error } = await supabase.rpc('register_player', {
@@ -51,6 +78,9 @@ export async function registerPlayer(
     };
   }
 
+  // Fire-and-forget, as it always was: a student is never held up by the
+  // optional profile write.
+  if (intake) void saveIntake(data, intake);
   return { ok: true, playerId: data };
 }
 

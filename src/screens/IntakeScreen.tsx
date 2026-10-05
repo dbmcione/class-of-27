@@ -3,7 +3,7 @@ import { SelectField } from '../components/SelectField';
 import { QuestionMatrix } from '../components/QuestionMatrix';
 import { QUESTIONS, STUDY_STAGES, type StudyStage } from '../flow/questions';
 import { collegeLocation, fetchColleges, type College } from '../lib/colleges';
-import { registerPlayer, saveIntake } from '../lib/players';
+import { registerPlayer } from '../lib/players';
 import type { Session } from '../flow/session';
 
 type Props = {
@@ -109,7 +109,8 @@ export function IntakeScreen({ phone, onDone }: Props) {
     // Registration happens here, not on the landing screen, because it needs
     // the college and the phone together. register_player upserts on phone, so
     // a number that registered but abandoned the intake reuses its own row.
-    const registration = await registerPlayer(collegeId, phone);
+    const intake = { name: name.trim(), stage, answers };
+    const registration = await registerPlayer(collegeId, phone, intake);
     if (!registration.ok) {
       setFormError(registration.message);
       setSubmitting(false);
@@ -122,9 +123,6 @@ export function IntakeScreen({ phone, onDone }: Props) {
       setSubmitting(false);
       return;
     }
-
-    const intake = { name: name.trim(), stage, answers };
-    void saveIntake(registration.playerId, intake);
 
     onDone({ playerId: registration.playerId, college, phone, ...intake });
   }

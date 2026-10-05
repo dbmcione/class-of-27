@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { formatDuration, formatMinutesSeconds } from '../flow/puzzle';
 import {
+  BOARD_TOP,
   fetchLeaderboard,
   fetchOwnPlace,
   type BoardPlace,
@@ -88,7 +89,7 @@ export function ScoreScreen({
   onSeeAnswers,
 }: Props) {
   /** The five shown on the page. The popup fetches the rest on demand. */
-  const TOP = 5;
+  const TOP = BOARD_TOP;
 
   const [board, setBoard] = useState<LeaderboardEntry[]>([]);
   const [place, setPlace] = useState<BoardPlace | null>(null);
@@ -147,16 +148,23 @@ export function ScoreScreen({
 
     void (async () => {
       // Wait for this round's own write before reading the board back.
-      const saved = pendingSave ? await pendingSave : { ok: true };
+      const saved: SaveResult = pendingSave ? await pendingSave : { ok: true, code: null };
       if (cancelled) return;
       setSaveFailed(!saved.ok);
 
+      // Normally the save brings the board back with it, so there is nothing
+      // more to ask for. Fetched here only when it did not: a database
+      // without the combined call yet, or a save that failed.
+      //
       // Both at once: the five to show, and where this student actually sits.
       // Their rank cannot be read off a five-row list when they are 24th.
-      const [rows, own] = await Promise.all([
-        fetchLeaderboard(college.id, TOP),
-        fetchOwnPlace(college.id, playerId),
-      ]);
+      const [rows, own] =
+        saved.board !== undefined && saved.place !== undefined
+          ? [saved.board, saved.place]
+          : await Promise.all([
+              fetchLeaderboard(college.id, TOP),
+              fetchOwnPlace(college.id, playerId),
+            ]);
       if (cancelled) return;
       setBoard(rows);
       setPlace(own);
@@ -186,7 +194,7 @@ export function ScoreScreen({
       if (!saved?.code) return;
       setShareCode(saved.code);
       const card = await cardRef.current;
-      if (card) await uploadScorecard(saved.code, card.blob);
+      if (card) await uploadScorecard(saved.code, card.blob, saved.isFirst);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingSave]);
