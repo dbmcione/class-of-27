@@ -109,7 +109,10 @@ best as (
   order by player_id, solved desc, total_seconds asc
 ),
 rounds as (
-  select player_id, count(*) as played, max(created_at) as last_played_at
+  select player_id,
+         count(*)        as played,
+         min(created_at) as first_played_at,
+         max(created_at) as last_played_at
   from public.round_scores
   group by player_id
 ),
@@ -138,6 +141,9 @@ select
     ''
   )                                              as best_time,
   coalesce(r.played, 0)                          as rounds_played,
+  -- Milliseconds, null until they finish a round. The sheet is sorted on it,
+  -- so it is a number rather than a formatted date; the script formats it.
+  floor(extract(epoch from r.first_played_at) * 1000)::bigint as first_played_ms,
   to_char(p.created_at at time zone 'Asia/Kolkata', 'DD Mon YYYY')       as signed_up,
   coalesce(
     to_char(r.last_played_at at time zone 'Asia/Kolkata', 'DD Mon YYYY'),

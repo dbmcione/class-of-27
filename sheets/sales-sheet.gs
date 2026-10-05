@@ -9,9 +9,15 @@
  * open, the sales team can edit the sheet freely without ever seeing the key.
  *
  * The sheet is the sales team's to work in. Rows are matched on phone, so
- * they can sort, filter and add their own columns (call notes, status) to the
+ * they can filter and add their own columns (call notes, status) to the
  * right or in between. A run only ever writes the columns listed in COLUMNS,
  * and leaves every other column exactly as it was.
+ *
+ * Rows are kept in the order students first played, oldest first, and put
+ * back in that order on every run; whole rows move, so the team's notes move
+ * with them. Students who signed up but have not finished a round go last.
+ * To see the sheet another way without undoing that, use a filter view
+ * (Data, Filter views), which every viewer gets separately.
  *
  * Each run:
  *   - updates every existing student's row (scores change as they replay)
@@ -54,6 +60,7 @@ var COLUMNS = [
   ['best_time', 'Best time'],
   ['rounds_played', 'Rounds played'],
   ['signed_up', 'Signed up'],
+  ['first_played_ms', 'First played'],
   ['last_played', 'Last played'],
   ['found_via', 'Found the game via'],
 ];
@@ -146,11 +153,20 @@ function refreshSalesSheet() {
         Object.keys(rowOf).forEach(function (phone) {
           var s = byPhone[phone];
           if (!s) return; // a row of the sales team's own, not a student
-          var v = s[c[0]];
-          values[rowOf[phone] - 2][0] = v === null || v === undefined ? '' : String(v);
+          values[rowOf[phone] - 2][0] = cellValue_(c[0], s[c[0]]);
         });
         range.setValues(values);
       });
+
+      sheet.getRange(2, col.first_played_ms, lastRow - 1, 1).setNumberFormat('d mmm yyyy, h:mm am/pm');
+
+      // Whole rows, every column, so the team's notes stay with their student.
+      // Blank first-played cells sort last.
+      if (lastRow > 2) {
+        sheet
+          .getRange(2, 1, lastRow - 1, sheet.getLastColumn())
+          .sort({ column: col.first_played_ms, ascending: true });
+      }
     }
 
     sheet
@@ -161,6 +177,20 @@ function refreshSalesSheet() {
   } finally {
     lock.releaseLock();
   }
+}
+
+/**
+ * What goes in the cell. Everything is written as text, except the first-play
+ * time: written as "2026-10-05 15:31" in India time, Sheets reads it as a
+ * date it can sort on, and those digits stay India time whatever time zone
+ * the spreadsheet itself is set to.
+ */
+function cellValue_(key, v) {
+  if (v === null || v === undefined || v === '') return '';
+  if (key === 'first_played_ms') {
+    return Utilities.formatDate(new Date(Number(v)), 'Asia/Kolkata', 'yyyy-MM-dd HH:mm');
+  }
+  return String(v);
 }
 
 /**
