@@ -118,7 +118,7 @@ function refreshLeads() {
     );
   }
 
-  // A run every minute can still overlap the one before if that one was slow.
+  // A run can still overlap the one before if that one was slow.
   // Two runs reading the sheet at once would each see a student as new and
   // both add them, and the student would be messaged twice. So a run that
   // finds another still going skips its turn; the next one catches up.
@@ -352,11 +352,18 @@ function fetchSince_(url, key, since) {
   }
 }
 
-/** Run once by hand to start the timer. Safe to re-run; it replaces the old one. */
+/**
+ * Run once by hand to start the timer. Safe to re-run; it replaces the old one.
+ *
+ * Every 5 minutes, not every 1. Make only checks the sheet every few minutes
+ * anyway, so a faster sync never got a message out sooner, and every run is a
+ * request that Supabase logs: once a minute was 1,440 log entries a day, most
+ * of them finding nobody new. Apps Script only offers 1, 5, 10, 15 or 30.
+ */
 function installTrigger() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
     if (t.getHandlerFunction() === 'refreshLeads') ScriptApp.deleteTrigger(t);
   });
-  ScriptApp.newTrigger('refreshLeads').timeBased().everyMinutes(1).create();
-  Logger.log('Refreshing every minute.');
+  ScriptApp.newTrigger('refreshLeads').timeBased().everyMinutes(5).create();
+  Logger.log('Refreshing every 5 minutes.');
 }
