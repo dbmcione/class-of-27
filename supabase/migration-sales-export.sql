@@ -12,6 +12,8 @@
 -- The three intro statements are named here by their keys from
 -- src/flow/questions.ts. If a statement is added there, add a column here.
 --
+-- Needs migration-course-clicks.sql to have been run first.
+--
 -- Safe to re-run.
 -- ---------------------------------------------------------------------------
 
@@ -116,6 +118,12 @@ rounds as (
   from public.round_scores
   group by player_id
 ),
+clicks as (
+  -- Anyone who has tapped "Know more about Class of ’27" at least once
+  -- (supabase/migration-course-clicks.sql).
+  select distinct player_id
+  from public.course_link_clicks
+),
 answers as (
   select
     player_id,
@@ -149,6 +157,7 @@ select
     to_char(r.last_played_at at time zone 'Asia/Kolkata', 'DD Mon YYYY'),
     ''
   )                                              as last_played,
+  case when ck.player_id is not null then 'Yes' else 'No' end as clicked_course_link,
   case p.source
     when 'share'    then 'Friend''s link'
     when 'campaign' then coalesce('Campaign: ' || cl.label, 'Campaign')
@@ -160,6 +169,7 @@ left join country_names cn      on cn.code = c.country
 left join best b                on b.player_id = p.id
 left join rounds r              on r.player_id = p.id
 left join answers a             on a.player_id = p.id
+left join clicks ck             on ck.player_id = p.id
 left join public.campaign_links cl
        on p.source = 'campaign' and cl.code = p.referred_by_code
 where p.name is not null;

@@ -265,8 +265,9 @@ export function App() {
         />
       )}
 
-      {step === 'reveal' && (
+      {step === 'reveal' && session && (
         <RevealScreen
+          playerId={session.playerId}
           puzzles={round}
           results={results}
           onPlayAgain={() => {

@@ -62,6 +62,7 @@ var COLUMNS = [
   ['signed_up', 'Signed up'],
   ['first_played_ms', 'First played'],
   ['last_played', 'Last played'],
+  ['clicked_course_link', 'Clicked Class of ’27 link'],
   ['found_via', 'Found the game via'],
 ];
 

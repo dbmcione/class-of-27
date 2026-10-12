@@ -81,7 +81,7 @@ export function PlayAnswersScreen({ code }: Props) {
         ))}
       </ol>
 
-      <CourseNote />
+      <CourseNote source={{ page: 'shared_answers', code }} />
 
       <a className="btn" href={homeHref(code)}>
         Play The Game

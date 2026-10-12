@@ -224,6 +224,10 @@ export type Database = {
           place: (BoardRow & { board_size: number }) | null;
         };
       };
+      record_course_click: {
+        Args: { p_page: 'answers' | 'shared_answers'; p_player_id: string | null; p_code: string | null };
+        Returns: undefined;
+      };
       /** register_player and save_intake in one call. */
       register_with_intake: {
         Args: {
