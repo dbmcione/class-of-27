@@ -305,10 +305,20 @@ function fetchAll_(url, key) {
 // ---------------------------------------------------------------------------
 // The Dashboard tab: a handful of quick facts for the sales team.
 //
-// Rewritten in full on every run from the same rows the Students tab gets,
-// so it costs no extra request to Supabase and always agrees with that tab.
-// Plain values, not formulas, so nothing the team does in Students can break
-// it. It is the script's tab: anything typed into it is replaced next run.
+// Refreshed on every run from the same rows the Students tab gets, so it
+// costs no extra request to Supabase and always agrees with that tab. Plain
+// values, not formulas, so nothing the team does in Students can break it.
+//
+// The script styles the tab only when it first creates it. After that, a run
+// replaces the values and leaves fonts, colours, borders and column widths
+// exactly as someone has set them. The one exception is number formats on
+// the percentage cells, which are reapplied so a share always reads "40%"
+// and never "0.4".
+//
+// Values are still the script's: anything typed into the tab is replaced on
+// the next run. The layout only moves if the categories change, e.g. a new
+// campaign link adds a row under HOW THEY FOUND IT and pushes HOW THEY SCORED
+// down by one.
 // ---------------------------------------------------------------------------
 
 var DASHBOARD_TAB = 'Dashboard';
@@ -334,12 +344,19 @@ var HOT_LEAD_MIN = 2;
 
 var DAY_MS = 24 * 60 * 60 * 1000;
 
+/** Set at the start of each dashboard write: true only for a brand-new tab. */
+var DASHBOARD_STYLE = false;
+
 function writeDashboard_(spreadsheet, students, now) {
   var sheet = spreadsheet.getSheetByName(DASHBOARD_TAB);
-  if (!sheet) {
+  // Only a brand-new tab gets the default styling; see the note above.
+  var style = !sheet;
+  DASHBOARD_STYLE = style;
+  if (style) {
     sheet = spreadsheet.insertSheet(DASHBOARD_TAB, 0);
+  } else {
+    sheet.clearContents();
   }
-  sheet.clear();
 
   var total = students.length;
   var weekAgo = now.getTime() - 7 * DAY_MS;
@@ -407,11 +424,14 @@ function writeDashboard_(spreadsheet, students, now) {
     return of > 0 ? n / of : 0;
   };
 
-  sheet.getRange(1, 1).setValue('Spot the Diagnosis: Sales Dashboard').setFontSize(14).setFontWeight('bold');
-  sheet
+  var heading = sheet.getRange(1, 1).setValue('Spot the Diagnosis: Sales Dashboard');
+  var updated = sheet
     .getRange(1, 5)
-    .setValue('Updated ' + Utilities.formatDate(now, 'Asia/Kolkata', 'd MMM yyyy, h:mm a') + ' IST')
-    .setFontColor('#666666');
+    .setValue('Updated ' + Utilities.formatDate(now, 'Asia/Kolkata', 'd MMM yyyy, h:mm a') + ' IST');
+  if (style) {
+    heading.setFontSize(14).setFontWeight('bold');
+    updated.setFontColor('#666666');
+  }
 
   // Three blocks across, then three more below the tallest of them.
   var top = 3;
@@ -471,6 +491,7 @@ function writeDashboard_(spreadsheet, students, now) {
     ['Got a perfect 5/5', played > 0 ? share(perfect, played) : 0],
   ], [null, '0%']);
 
+  if (!style) return;
   sheet.setColumnWidth(1, 300);
   sheet.setColumnWidth(2, 70);
   sheet.setColumnWidth(3, 30);
@@ -489,16 +510,20 @@ function writeDashboard_(spreadsheet, students, now) {
  * number format per column, or null. Returns the height used, title included.
  */
 function block_(sheet, row, col, title, rows, formats) {
-  sheet.getRange(row, col).setValue(title).setFontWeight('bold').setFontColor('#4a3d8f');
+  var titleCell = sheet.getRange(row, col).setValue(title);
+  if (DASHBOARD_STYLE) titleCell.setFontWeight('bold').setFontColor('#4a3d8f');
   if (rows.length === 0) {
-    sheet.getRange(row + 1, col).setValue('—').setFontColor('#999999');
+    var none = sheet.getRange(row + 1, col).setValue('—');
+    if (DASHBOARD_STYLE) none.setFontColor('#999999');
     return 2;
   }
   var width = rows[0].length;
   var range = sheet.getRange(row + 1, col, rows.length, width);
   range.setValues(rows);
-  range.setVerticalAlignment('middle');
-  sheet.getRange(row + 1, col, rows.length, 1).setWrap(true);
+  if (DASHBOARD_STYLE) {
+    range.setVerticalAlignment('middle');
+    sheet.getRange(row + 1, col, rows.length, 1).setWrap(true);
+  }
   (formats || []).forEach(function (f, i) {
     if (f) sheet.getRange(row + 1, col + i, rows.length, 1).setNumberFormat(f);
   });
