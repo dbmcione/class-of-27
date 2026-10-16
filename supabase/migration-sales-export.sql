@@ -153,6 +153,9 @@ select
   -- so it is a number rather than a formatted date; the script formats it.
   floor(extract(epoch from r.first_played_at) * 1000)::bigint as first_played_ms,
   to_char(p.created_at at time zone 'Asia/Kolkata', 'DD Mon YYYY')       as signed_up,
+  -- Milliseconds, for the dashboard's "new in the last 7 days". Not a sheet
+  -- column; signed_up above is the readable one.
+  floor(extract(epoch from p.created_at) * 1000)::bigint                  as signed_up_ms,
   coalesce(
     to_char(r.last_played_at at time zone 'Asia/Kolkata', 'DD Mon YYYY'),
     ''

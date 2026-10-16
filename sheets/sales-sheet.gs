@@ -175,6 +175,10 @@ function refreshSalesSheet() {
       .setNote('Updated ' + Utilities.formatDate(new Date(), 'Asia/Kolkata', 'd MMM yyyy, h:mm a') + ' IST');
 
     Logger.log(students.length + ' student(s) from the database, ' + added + ' new.');
+
+    // Last, so a problem drawing the dashboard can never stop the student
+    // rows above from being written.
+    writeDashboard_(spreadsheet, students, new Date());
   } finally {
     lock.releaseLock();
   }
@@ -295,6 +299,236 @@ function fetchAll_(url, key) {
     all = all.concat(page);
     if (page.length < PAGE) return all;
     offset += PAGE;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The Dashboard tab: a handful of quick facts for the sales team.
+//
+// Rewritten in full on every run from the same rows the Students tab gets,
+// so it costs no extra request to Supabase and always agrees with that tab.
+// Plain values, not formulas, so nothing the team does in Students can break
+// it. It is the script's tab: anything typed into it is replaced next run.
+// ---------------------------------------------------------------------------
+
+var DASHBOARD_TAB = 'Dashboard';
+
+/** In the order the game's intro offers them, most senior first. */
+var STAGES = ['Post-Intern', 'Intern', '4th Year', '3rd Year', '2nd Year', '1st Year'];
+
+var SOUNDS_LIKE_ME = 'Sounds like me';
+
+/** [view column, short label]. The full statements are the Students headings. */
+var STATEMENTS = [
+  ['timetable_slips', 'Timetable slips'],
+  ['recall_under_pressure', 'Struggle to apply'],
+  ['postpones_mcqs', 'Postpone MCQs'],
+];
+
+/**
+ * Hot leads: closest to NEET PG and saying they struggle. A student in one of
+ * these years who said "Sounds like me" to at least HOT_LEAD_MIN statements.
+ */
+var HOT_LEAD_STAGES = ['Intern', 'Post-Intern'];
+var HOT_LEAD_MIN = 2;
+
+var DAY_MS = 24 * 60 * 60 * 1000;
+
+function writeDashboard_(spreadsheet, students, now) {
+  var sheet = spreadsheet.getSheetByName(DASHBOARD_TAB);
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(DASHBOARD_TAB, 0);
+  }
+  sheet.clear();
+
+  var total = students.length;
+  var weekAgo = now.getTime() - 7 * DAY_MS;
+  var yesterday = Utilities.formatDate(new Date(now.getTime() - DAY_MS), 'Asia/Kolkata', 'yyyy-MM-dd');
+
+  var newThisWeek = 0;
+  var newYesterday = 0;
+  var played = 0;
+  var repeat = 0;
+  var clicked = 0;
+  var clicksTracked = false;
+  var hot = 0;
+  var stageCount = {};
+  var said = STATEMENTS.map(function () {
+    return { yes: 0, answered: 0 };
+  });
+  var colleges = {};
+  var states = {};
+  var found = {};
+  var solvedSum = 0;
+  var perfect = 0;
+
+  students.forEach(function (s) {
+    var signedUp = signedUpMs_(s);
+    if (signedUp !== null) {
+      if (signedUp >= weekAgo) newThisWeek++;
+      if (Utilities.formatDate(new Date(signedUp), 'Asia/Kolkata', 'yyyy-MM-dd') === yesterday) newYesterday++;
+    }
+
+    var rounds = Number(s.rounds_played) || 0;
+    if (rounds > 0) played++;
+    if (rounds > 1) repeat++;
+
+    if (s.clicked_course_link !== undefined) clicksTracked = true;
+    if (s.clicked_course_link === 'Yes') clicked++;
+
+    var stage = s.stage || 'Not given';
+    stageCount[stage] = (stageCount[stage] || 0) + 1;
+
+    var yesCount = 0;
+    STATEMENTS.forEach(function (st, i) {
+      var answer = s[st[0]];
+      if (answer) said[i].answered++;
+      if (answer === SOUNDS_LIKE_ME) {
+        said[i].yes++;
+        yesCount++;
+      }
+    });
+    if (HOT_LEAD_STAGES.indexOf(s.stage) !== -1 && yesCount >= HOT_LEAD_MIN) hot++;
+
+    if (s.college) colleges[s.college] = (colleges[s.college] || 0) + 1;
+    if (s.state) states[s.state] = (states[s.state] || 0) + 1;
+
+    var via = s.found_via || 'Direct';
+    found[via] = (found[via] || 0) + 1;
+
+    var best = /^(\d+)\/(\d+)$/.exec(String(s.best_score || ''));
+    if (best) {
+      solvedSum += Number(best[1]);
+      if (best[1] === best[2]) perfect++;
+    }
+  });
+
+  var share = function (n, of) {
+    return of > 0 ? n / of : 0;
+  };
+
+  sheet.getRange(1, 1).setValue('Spot the Diagnosis: Sales Dashboard').setFontSize(14).setFontWeight('bold');
+  sheet
+    .getRange(1, 5)
+    .setValue('Updated ' + Utilities.formatDate(now, 'Asia/Kolkata', 'd MMM yyyy, h:mm a') + ' IST')
+    .setFontColor('#666666');
+
+  // Three blocks across, then three more below the tallest of them.
+  var top = 3;
+  var h1 = block_(sheet, top, 1, 'AT A GLANCE', [
+    ['Total students', total],
+    ['New in the last 7 days', newThisWeek],
+    ['New yesterday', newYesterday],
+    ['Played a round', played],
+    ['Not played yet', total - played],
+    ['Played more than once', repeat],
+    ['Clicked Class of ’27 link', clicksTracked ? clicked : 'Not tracked yet'],
+  ]);
+
+  var stageRows = STAGES.concat(
+    Object.keys(stageCount).filter(function (k) {
+      return STAGES.indexOf(k) === -1;
+    })
+  )
+    .filter(function (k) {
+      return stageCount[k];
+    })
+    .map(function (k) {
+      return [k, stageCount[k], share(stageCount[k], total)];
+    });
+  var h2 = block_(sheet, top, 4, 'WHO THEY ARE', stageRows, [null, null, '0%']);
+  h2 += 1 + block_(sheet, top + h2 + 1, 4, 'HOT LEADS', [
+    ['Intern / Post-Intern, “Sounds like me” to 2+', hot],
+  ]);
+
+  var h3 = block_(
+    sheet,
+    top,
+    8,
+    'WHAT THEY TOLD US  (% “Sounds like me”)',
+    STATEMENTS.map(function (st, i) {
+      return [st[1], share(said[i].yes, said[i].answered)];
+    }),
+    [null, '0%']
+  );
+
+  var second = top + Math.max(h1, h2, h3) + 1;
+
+  block_(sheet, second, 1, 'TOP COLLEGES', topN_(colleges, 10));
+  block_(sheet, second, 4, 'TOP STATES', topN_(states, 5));
+  var hFound = block_(
+    sheet,
+    second,
+    8,
+    'HOW THEY FOUND IT',
+    topN_(found, 10).map(function (r) {
+      return [r[0], r[1], share(r[1], total)];
+    }),
+    [null, null, '0%']
+  );
+  block_(sheet, second + hFound + 1, 8, 'HOW THEY SCORED', [
+    ['Average best score', played > 0 ? (solvedSum / played).toFixed(1) + ' / 5' : '—'],
+    ['Got a perfect 5/5', played > 0 ? share(perfect, played) : 0],
+  ], [null, '0%']);
+
+  sheet.setColumnWidth(1, 300);
+  sheet.setColumnWidth(2, 70);
+  sheet.setColumnWidth(3, 30);
+  sheet.setColumnWidth(4, 260);
+  sheet.setColumnWidth(5, 70);
+  sheet.setColumnWidth(6, 60);
+  sheet.setColumnWidth(7, 30);
+  sheet.setColumnWidth(8, 220);
+  sheet.setColumnWidth(9, 70);
+  sheet.setColumnWidth(10, 60);
+  sheet.setHiddenGridlines(true);
+}
+
+/**
+ * A title and rows of [label, value, ...] at (row, col). formats gives a
+ * number format per column, or null. Returns the height used, title included.
+ */
+function block_(sheet, row, col, title, rows, formats) {
+  sheet.getRange(row, col).setValue(title).setFontWeight('bold').setFontColor('#4a3d8f');
+  if (rows.length === 0) {
+    sheet.getRange(row + 1, col).setValue('—').setFontColor('#999999');
+    return 2;
+  }
+  var width = rows[0].length;
+  var range = sheet.getRange(row + 1, col, rows.length, width);
+  range.setValues(rows);
+  range.setVerticalAlignment('middle');
+  sheet.getRange(row + 1, col, rows.length, 1).setWrap(true);
+  (formats || []).forEach(function (f, i) {
+    if (f) sheet.getRange(row + 1, col + i, rows.length, 1).setNumberFormat(f);
+  });
+  return rows.length + 1;
+}
+
+/** The n biggest counts, as [name, count], biggest first. */
+function topN_(counts, n) {
+  return Object.keys(counts)
+    .map(function (k) {
+      return [k, counts[k]];
+    })
+    .sort(function (a, b) {
+      return b[1] - a[1] || String(a[0]).localeCompare(String(b[0]));
+    })
+    .slice(0, n);
+}
+
+/**
+ * When a student signed up, in milliseconds. From the view's exact time when
+ * it has one; otherwise from the "16 Oct 2026" date, taken as the start of
+ * that day in India, which is close enough until the view is updated.
+ */
+function signedUpMs_(s) {
+  if (s.signed_up_ms !== undefined && s.signed_up_ms !== null) return Number(s.signed_up_ms);
+  if (!s.signed_up) return null;
+  try {
+    return Utilities.parseDate(String(s.signed_up), 'Asia/Kolkata', 'dd MMM yyyy').getTime();
+  } catch (e) {
+    return null;
   }
 }
 
