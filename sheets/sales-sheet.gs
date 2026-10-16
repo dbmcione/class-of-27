@@ -317,8 +317,8 @@ function fetchAll_(url, key) {
 //
 // Values are still the script's: anything typed into the tab is replaced on
 // the next run. The layout only moves if the categories change, e.g. a new
-// campaign link adds a row under HOW THEY FOUND IT and pushes HOW THEY SCORED
-// down by one.
+// year of study appearing adds a row under WHO THEY ARE and pushes WARM
+// LEADS down by one.
 // ---------------------------------------------------------------------------
 
 var DASHBOARD_TAB = 'Dashboard';
@@ -336,11 +336,11 @@ var STATEMENTS = [
 ];
 
 /**
- * Hot leads: closest to NEET PG and saying they struggle. A student in one of
- * these years who said "Sounds like me" to at least HOT_LEAD_MIN statements.
+ * Warm leads: closest to NEET PG and saying they struggle. A student in one of
+ * these years who said "Sounds like me" to at least WARM_LEAD_MIN statements.
  */
-var HOT_LEAD_STAGES = ['Intern', 'Post-Intern'];
-var HOT_LEAD_MIN = 2;
+var WARM_LEAD_STAGES = ['Intern', 'Post-Intern'];
+var WARM_LEAD_MIN = 2;
 
 var DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -368,7 +368,7 @@ function writeDashboard_(spreadsheet, students, now) {
   var repeat = 0;
   var clicked = 0;
   var clicksTracked = false;
-  var hot = 0;
+  var warm = 0;
   var stageCount = {};
   var said = STATEMENTS.map(function () {
     return { yes: 0, answered: 0 };
@@ -376,8 +376,6 @@ function writeDashboard_(spreadsheet, students, now) {
   var colleges = {};
   var states = {};
   var found = {};
-  var solvedSum = 0;
-  var perfect = 0;
 
   students.forEach(function (s) {
     var signedUp = signedUpMs_(s);
@@ -405,19 +403,13 @@ function writeDashboard_(spreadsheet, students, now) {
         yesCount++;
       }
     });
-    if (HOT_LEAD_STAGES.indexOf(s.stage) !== -1 && yesCount >= HOT_LEAD_MIN) hot++;
+    if (WARM_LEAD_STAGES.indexOf(s.stage) !== -1 && yesCount >= WARM_LEAD_MIN) warm++;
 
     if (s.college) colleges[s.college] = (colleges[s.college] || 0) + 1;
     if (s.state) states[s.state] = (states[s.state] || 0) + 1;
 
     var via = s.found_via || 'Direct';
     found[via] = (found[via] || 0) + 1;
-
-    var best = /^(\d+)\/(\d+)$/.exec(String(s.best_score || ''));
-    if (best) {
-      solvedSum += Number(best[1]);
-      if (best[1] === best[2]) perfect++;
-    }
   });
 
   var share = function (n, of) {
@@ -457,8 +449,8 @@ function writeDashboard_(spreadsheet, students, now) {
       return [k, stageCount[k], share(stageCount[k], total)];
     });
   var h2 = block_(sheet, top, 4, 'WHO THEY ARE', stageRows, [null, null, '0%']);
-  h2 += 1 + block_(sheet, top + h2 + 1, 4, 'HOT LEADS', [
-    ['Intern / Post-Intern, “Sounds like me” to 2+', hot],
+  h2 += 1 + block_(sheet, top + h2 + 1, 4, 'WARM LEADS', [
+    ['Intern / Post-Intern, “Sounds like me” to 2+', warm],
   ]);
 
   var h3 = block_(
@@ -476,7 +468,7 @@ function writeDashboard_(spreadsheet, students, now) {
 
   block_(sheet, second, 1, 'TOP COLLEGES', topN_(colleges, 10));
   block_(sheet, second, 4, 'TOP STATES', topN_(states, 5));
-  var hFound = block_(
+  block_(
     sheet,
     second,
     8,
@@ -486,10 +478,6 @@ function writeDashboard_(spreadsheet, students, now) {
     }),
     [null, null, '0%']
   );
-  block_(sheet, second + hFound + 1, 8, 'HOW THEY SCORED', [
-    ['Average best score', played > 0 ? (solvedSum / played).toFixed(1) + ' / 5' : '—'],
-    ['Got a perfect 5/5', played > 0 ? share(perfect, played) : 0],
-  ], [null, '0%']);
 
   if (!style) return;
   sheet.setColumnWidth(1, 300);
