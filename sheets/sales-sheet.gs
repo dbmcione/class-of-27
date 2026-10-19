@@ -29,6 +29,9 @@
  *   SUPABASE_URL    https://<project>.supabase.co
  *   SUPABASE_KEY    the service_role key
  *   SALES_SHEET_ID  the long id in the sales sheet's address, between /d/ and /edit
+ *   SUBSCRIPTIONS_SHEET_ID  the payments sheet's id, for the two subscription
+ *                   columns (see readSubscriptions_). Optional: without it
+ *                   those columns stay blank.
  */
 
 /** The database view to read (supabase/migration-sales-export.sql). */
@@ -64,7 +67,12 @@ var COLUMNS = [
   ['last_played', 'Last played'],
   ['clicked_course_link', 'Clicked Class of ’27 link'],
   ['found_via', 'Found the game via'],
+  ['subscribed_now', 'Currently subscribed?'],
+  ['subscribed_ever', 'Ever subscribed?'],
 ];
+
+/** The two columns that come from the payments sheet, not from Supabase. */
+var SUBSCRIPTION_KEYS = ['subscribed_now', 'subscribed_ever'];
 
 /** PostgREST caps a response at 1000 rows, so it is read a page at a time. */
 var PAGE = 1000;
@@ -99,6 +107,20 @@ function refreshSalesSheet() {
 
   try {
     var students = fetchAll_(url, key);
+
+    // Read before anything is written. If the payments sheet cannot be read,
+    // the two subscription columns are left as they were (yesterday's answer
+    // beats a column of blanks) and the run fails at the very end, after
+    // everything else is written, so the failure email still arrives.
+    var subs = readSubscriptions_(props);
+    if (subs.ok) {
+      students.forEach(function (s) {
+        var found = subs.byPhone[String(s.phone)];
+        s.subscribed_now = found && found.now ? 'Yes' : 'No';
+        s.subscribed_ever = found ? 'Yes' : 'No';
+      });
+    }
+
     var spreadsheet = SpreadsheetApp.openById(sheetId);
     var sheet = spreadsheet.getSheetByName(TAB) || spreadsheet.insertSheet(TAB);
 
@@ -149,6 +171,7 @@ function refreshSalesSheet() {
       // rewrite the sales team's columns, turning any formulas there into
       // plain values.
       COLUMNS.forEach(function (c) {
+        if (!subs.ok && SUBSCRIPTION_KEYS.indexOf(c[0]) !== -1) return;
         var range = sheet.getRange(2, col[c[0]], lastRow - 1, 1);
         var values = range.getValues();
         Object.keys(rowOf).forEach(function (phone) {
@@ -179,9 +202,129 @@ function refreshSalesSheet() {
     // Last, so a problem drawing the dashboard can never stop the student
     // rows above from being written.
     writeDashboard_(spreadsheet, students, new Date());
+
+    if (!subs.ok) {
+      throw new Error('Subscription columns not updated: ' + subs.error);
+    }
   } finally {
     lock.releaseLock();
   }
+}
+
+// ---------------------------------------------------------------------------
+// Subscriptions: "Currently subscribed?" and "Ever subscribed?".
+//
+// Read from the payments sheet, one row per payment, matched to students on
+// phone number only. Nothing else in it (names, emails, amounts) is used, and
+// nothing is ever written to it.
+//
+// A payment counts when:
+//   - its Plan Name contains "Live 360" (any capitals, so "Live 360 – Annual"
+//     counts too), and
+//   - it was not refunded or terminated (Refund/Terminated? says "Processed",
+//     "Terminated", "Refunded" or "Yes").
+// Ever subscribed:     at least one payment that counts.
+// Currently subscribed: one of those plans is still running today, i.e. its
+//                      Payment_date plus its Plan Duration in Months is later
+//                      than today.
+// ---------------------------------------------------------------------------
+
+/** The tab to read, by the gid in its address. #gid=0 is "Sheet 1". */
+var SUBSCRIPTIONS_TAB_GID = 0;
+
+/** Headings in the payments sheet. Found by name, so columns can move. */
+var SUB_HEADINGS = {
+  phone: 'User_mobile',
+  paid: 'Payment_date',
+  plan: 'Plan Name',
+  months: 'Plan Duration in Months',
+  refund: 'Refund/Terminated?',
+};
+
+var COUNTED_PLAN = /live\s*360/i;
+var REFUNDED = /processed|terminated|refund|^\s*yes\s*$/i;
+
+/**
+ * { ok: true, byPhone: { '9876543210': { now: true|false } } }, or
+ * { ok: false, error } when the sheet is not set up or cannot be read.
+ */
+function readSubscriptions_(props) {
+  var id = props.getProperty('SUBSCRIPTIONS_SHEET_ID');
+  if (!id) return { ok: false, error: 'SUBSCRIPTIONS_SHEET_ID is not set in Script Properties.' };
+
+  var tab;
+  try {
+    tab = SpreadsheetApp.openById(id)
+      .getSheets()
+      .filter(function (t) {
+        return t.getSheetId() === SUBSCRIPTIONS_TAB_GID;
+      })[0];
+  } catch (e) {
+    return { ok: false, error: 'could not open the payments sheet (is it shared with this account?): ' + e.message };
+  }
+  if (!tab) return { ok: false, error: 'the payments sheet has no tab with gid ' + SUBSCRIPTIONS_TAB_GID + '.' };
+
+  var rows = tab.getDataRange().getValues();
+  var header = (rows[0] || []).map(function (h) {
+    return String(h).trim().toLowerCase();
+  });
+  var at = {};
+  var missing = [];
+  Object.keys(SUB_HEADINGS).forEach(function (k) {
+    at[k] = header.indexOf(SUB_HEADINGS[k].toLowerCase());
+    if (at[k] === -1) missing.push(SUB_HEADINGS[k]);
+  });
+  if (missing.length) return { ok: false, error: 'the payments sheet has no column called ' + missing.join(', ') + '.' };
+
+  var today = new Date();
+  var byPhone = {};
+  var unreadableDates = 0;
+
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i];
+    if (!COUNTED_PLAN.test(String(r[at.plan]))) continue;
+    if (REFUNDED.test(String(r[at.refund]))) continue;
+
+    var phone = tenDigits_(r[at.phone]);
+    if (!phone) continue;
+
+    var entry = byPhone[phone] || (byPhone[phone] = { now: false });
+
+    var paid = toDate_(r[at.paid]);
+    var months = parseInt(String(r[at.months]), 10);
+    if (!paid || !(months > 0)) {
+      // Still a subscriber; just not one whose end date can be worked out.
+      unreadableDates++;
+      continue;
+    }
+    var ends = new Date(paid.getFullYear(), paid.getMonth() + months, paid.getDate());
+    if (ends > today) entry.now = true;
+  }
+
+  if (unreadableDates) {
+    Logger.log(unreadableDates + ' Live 360 payment(s) had a date or duration that could not be read; counted as ever, not current.');
+  }
+  Logger.log(Object.keys(byPhone).length + ' phone number(s) with a Live 360 subscription.');
+  return { ok: true, byPhone: byPhone };
+}
+
+/** "919876543210", "+91 98765 43210", "09876543210" or 9876543210 → "9876543210". */
+function tenDigits_(v) {
+  var d = String(v).replace(/\D/g, '');
+  if (d.length === 12 && d.indexOf('91') === 0) return d.slice(2);
+  if (d.length === 11 && d.charAt(0) === '0') return d.slice(1);
+  return d.length === 10 ? d : null;
+}
+
+/**
+ * A real date cell, or text written day first: "13/04/2026" (also with
+ * dashes or dots). Some cells in the payments sheet are text, not dates.
+ */
+function toDate_(v) {
+  if (v instanceof Date && !isNaN(v.getTime())) return v;
+  var m = /^\s*(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})\s*$/.exec(String(v));
+  if (!m) return null;
+  return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
 }
 
 /**
