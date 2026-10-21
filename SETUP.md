@@ -1,5 +1,10 @@
 # Connecting Supabase
 
+> **Historical.** These are the original first-time setup steps from September
+> 2026. The database has changed a lot since; for anything current, use
+> `DEPLOY.md` (including the order to build a fresh database, and the scripts
+> that must never be re-run on live data).
+
 Node and the app are already running. This is the remaining piece.
 
 ---
